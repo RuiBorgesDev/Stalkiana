@@ -375,7 +375,7 @@ namespace Stalkiana_Console
                 Console.WriteLine("Getting Following...");
                 usersFollowing = getFollowingList(userPK, cookie, minTime, maxTime, count);
 
-                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 3)//Sometimes a few followings are not fetched
+                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 2)//Sometimes a few followings are not fetched
                 {
                     Console.Error.WriteLine("Something went wrong while fetching Following.");
                     return;
@@ -384,7 +384,7 @@ namespace Stalkiana_Console
                 Console.WriteLine("Getting Followers...");
                 usersFollowers = getFollowersList(userPK, cookie, minTime, maxTime, count);
 
-                if (usersFollowers == null || Math.Abs(userFollowersCount - usersFollowers.Count) >= 3)//Sometimes a few followers are not fetched
+                if (usersFollowers == null || Math.Abs(userFollowersCount - usersFollowers.Count) >= 2)//Sometimes a few followers are not fetched
                 {
                     Console.Error.WriteLine("Something went wrong while fetching Followers.");
                     return;
