@@ -23,7 +23,7 @@ A simple command-line tool for stalking an instagram account.
 ## Prerequisites
 
 - .NET SDK 8.0 installed on your machine;
-- Instagram credentials (cookies);
+- Instagram credentials (cookie and csrftoken);
 
 ## Installation
 
@@ -54,8 +54,8 @@ This tool has two main functions:
 
 2- Tracking followers/followings by keeping a local list of the followers/followings of an instagram user and then upon execution check if the follower/following count has changed compared to the last execution time, if it changed it determines the difference by comparing the new list with the old list, when the tool finishes execution, it logs the results into a results.txt file.
 
-This tool requires the instagram cookie in order to work.
-If you don't know how to get the cookie, here are the steps to get it:
+This tool requires the instagram cookie and csrftoken in order to work.
+If you don't know how to get the cookie and csrftoken, here are the steps to get it:
 
 
 1. Launch your browser and open the inspect element panel (CTRL + SHIFT + C or F12).
@@ -68,3 +68,6 @@ If you don't know how to get the cookie, here are the steps to get it:
 
 
 4. Go to request headers and search for the cookie, triple click the full value and copy it.
+
+
+5. To get the csrftoken, in the same request, search for it and copy it.

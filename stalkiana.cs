@@ -48,7 +48,7 @@ namespace Stalkiana_Console
             string option;
             do
             {
-                Console.WriteLine("\n1- Download Profile Picture");
+                Console.WriteLine("\n1- Download Profile Picture ");
                 Console.WriteLine("2- Get Followers/Following\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
@@ -163,6 +163,21 @@ namespace Stalkiana_Console
             return cookie;
         }
 
+        static string getCsrftoken()
+        {
+            string csrftoken;
+            do
+            {
+                Console.Write("\nPlease input the csrtoken: ");
+                csrftoken = Console.ReadLine()!;
+                if (string.IsNullOrWhiteSpace(csrftoken))
+                {
+                    Console.WriteLine("Csrftoken cannot be empty. Please enter a valid csrftoken.");
+                }
+            } while (string.IsNullOrWhiteSpace(csrftoken));
+            return csrftoken;
+        }
+
         static string? getUserPK(string cookie, string username)
         {
             string userPK;
@@ -196,11 +211,12 @@ namespace Stalkiana_Console
             }
         }
 
-        static int getFollowingCount(string userPK, string cookie)
+        static int getFollowingCount(string userPK, string cookie, string csrftoken)
         {
             var request = new RestRequest("/graphql/query/", Method.Post);
             request.AddHeader("content-type", "application/x-www-form-urlencoded");
             request.AddHeader("cookie", cookie);
+            request.AddHeader("x-csrftoken", csrftoken);
             request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7663723823674585", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
             if (response.IsSuccessful)
@@ -223,11 +239,12 @@ namespace Stalkiana_Console
                 return -1;
             }
         }
-        static int getFollowerCount(string userPK, string cookie)
+        static int getFollowerCount(string userPK, string cookie, string csrftoken)
         {
             var request = new RestRequest("/graphql/query/", Method.Post);
             request.AddHeader("content-type", "application/x-www-form-urlencoded");
             request.AddHeader("cookie", cookie);
+            request.AddHeader("x-csrftoken", csrftoken);
             request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7663723823674585", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
             if (response.IsSuccessful)
@@ -302,6 +319,7 @@ namespace Stalkiana_Console
             string username;
             string option;
             string cookie;
+            string csrftoken;
             string count = "50";
             string? userPK;
 
@@ -315,9 +333,11 @@ namespace Stalkiana_Console
             {
                 username = args[0];
             }
-            else if(args.Length == 2){
+            else if (args.Length == 2)
+            {
                 username = args[0];
-                if(Int32.TryParse(args[1], out int _out) && _out >= 1){
+                if (Int32.TryParse(args[1], out int _out) && _out >= 1)
+                {
                     count = args[1];
                 }
             }
@@ -325,7 +345,7 @@ namespace Stalkiana_Console
             {
                 username = getUsername();
             }
-            
+
             option = getOption();
 
             string followingFileName = $"{username}/{username}_followings.json";
@@ -333,6 +353,7 @@ namespace Stalkiana_Console
             string resultFileName = $"{username}/result.txt";
 
             cookie = getCookie();
+            csrftoken = getCsrftoken();
             userPK = getUserPK(cookie, username);
 
             if (userPK == null)
@@ -345,7 +366,7 @@ namespace Stalkiana_Console
 
             if (option == "1")
             {
-                downloadProfileImage(username, userPK);
+                downloadProfileImage(username, userPK, csrftoken);
                 client.Dispose();
             }
 
@@ -353,9 +374,9 @@ namespace Stalkiana_Console
             {
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n\n");
 
-                userFollowersCount = getFollowerCount(userPK, cookie);
+                userFollowersCount = getFollowerCount(userPK, cookie, csrftoken);
                 sleepRandom(minTime, maxTime);
-                userFollowingCount = getFollowingCount(userPK, cookie);
+                userFollowingCount = getFollowingCount(userPK, cookie, csrftoken);
 
                 if (userFollowersCount < 1 || userFollowingCount < 1)
                 {
@@ -468,12 +489,11 @@ namespace Stalkiana_Console
             return;
         }
 
-        static void downloadProfileImage(string username, string userPK)
+        static void downloadProfileImage(string username, string userPK, string csrftoken)
         {
             var request = new RestRequest("/graphql/query/", Method.Post);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.AddHeader("sec-fetch-site", "same-origin");
-            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7603613946386817", "application/x-www-form-urlencoded");
+            request.AddHeader("x-csrftoken", csrftoken);
+            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=9718997071514355", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
             if (!response.IsSuccessful)
             {
