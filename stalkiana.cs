@@ -1,273 +1,23 @@
 ﻿/*
 
-Do not use the tool multiple times per day or you might get flagged by instagram
+Do not use the tool multiple times per day or you might get flagged by Instagram
 
 */
 
-using System;
 using RestSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace Stalkiana_Console
 {
+    public class AppConfig
+    {
+        public string? cookie { get; set; }
+        public string? csrftoken { get; set; }
+    }
     internal class Program
     {
-        public static RestClient client = new RestClient("https://www.instagram.com");
-        static void displayStartingScreen()
-        {
-            Console.Clear();
-            Console.WriteLine("Welcome to Stalkiana the instagram stalking tool\n");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(@"  _________  __           .__    __    .__                         
- /   _____/_/  |_ _____   |  |  |  | __|__|_____     ____  _____   
- \_____  \ \   __\\__  \  |  |  |  |/ /|  |\__  \   /    \ \__  \  
- /        \ |  |   / __ \_|  |__|    < |  | / __ \_|   |  \ / __ \_
-/_______  / |__|  (____  /|____/|__|_ \|__|(____  /|___|  /(____  /
-        \/             \/            \/         \/      \/      \/ ");
-            Console.ResetColor();
-            Console.Write("\nThis is a tool used for stalking an Instagram user\n");
-        }
-        static string getUsername()
-        {
-            string username;
-            do
-            {
-                Console.Write("\nPlease input the username to stalk: ");
-                username = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(username))
-                {
-                    Console.WriteLine("Username cannot be empty. Please enter a valid username.");
-                }
-            } while (string.IsNullOrWhiteSpace(username));
-            return username;
-        }
-        static string getOption()
-        {
-            string option;
-            do
-            {
-                Console.WriteLine("\n1- Download Profile Picture ");
-                Console.WriteLine("2- Get Followers/Following\n");
-                Console.Write("Choose what you want to do: ");
-                option = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(option))
-                {
-                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1 or 2).");
-                }
-            } while (option != "1" && option != "2");
-            return option;
-        }
-
-        static Dictionary<string, string>? getFollowersList(string userPK, string cookie, int minTime, int maxTime, string count)
-        {
-            var list = new Dictionary<string, string>();
-            bool hasNext = true;
-            string? after = null;
-            while (hasNext)
-            {
-                var request = new RestRequest("/graphql/query/", Method.Get);
-                request.AddQueryParameter("query_hash", "c76146de99bb02f6415203be841dd25a");
-                request.AddQueryParameter("id", userPK);
-                request.AddQueryParameter("include_reel", "true");
-                request.AddQueryParameter("fetch_mutual", "true");
-                request.AddQueryParameter("first", count);
-                request.AddQueryParameter("after", after);
-                request.AddHeader("cookie", cookie);
-                var response = client.Execute(request);
-                if (response.IsSuccessful)
-                {
-                    try
-                    {
-                        dynamic? obj = JsonConvert.DeserializeObject(response.Content!);
-                        hasNext = obj!.data.user.edge_followed_by.page_info.has_next_page;
-                        after = obj.data.user.edge_followed_by.page_info.end_cursor;
-                        foreach (dynamic follower in obj.data.user.edge_followed_by.edges)
-                        {
-                            list[(string)follower.node.id] = (string)follower.node.username;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Error.WriteLine($"Error fetching followers: {e.Message}");
-                        return null;
-                    }
-                    sleepRandom(minTime, maxTime);
-                }
-                else
-                {
-                    Console.WriteLine($"Error in fetching followers: {response.StatusCode}");
-                    return null;
-                }
-            }
-            return list;
-        }
-
-        static Dictionary<string, string>? getFollowingList(string userPK, string cookie, int minTime, int maxTime, string count)
-        {
-            var list = new Dictionary<string, string>();
-            bool hasNext = true;
-            string? after = null;
-            while (hasNext)
-            {
-                var request = new RestRequest("/graphql/query/", Method.Get);
-                request.AddQueryParameter("query_hash", "d04b0a864b4b54837c0d870b0e77e076");
-                request.AddQueryParameter("id", userPK);
-                request.AddQueryParameter("include_reel", "true");
-                request.AddQueryParameter("fetch_mutual", "true");
-                request.AddQueryParameter("first", count);
-                request.AddQueryParameter("after", after);
-                request.AddHeader("cookie", cookie);
-                var response = client.Execute(request);
-                if (response.IsSuccessful)
-                {
-                    try
-                    {
-                        dynamic? obj = JsonConvert.DeserializeObject(response.Content!);
-                        hasNext = obj!.data.user.edge_follow.page_info.has_next_page;
-                        after = obj.data.user.edge_follow.page_info.end_cursor;
-                        foreach (dynamic following in obj.data.user.edge_follow.edges)
-                        {
-                            list[(string)following.node.id] = (string)following.node.username;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Error.WriteLine($"Error fetching following: {e.Message}");
-                        return null;
-                    }
-                    sleepRandom(minTime, maxTime);
-                }
-                else
-                {
-                    Console.WriteLine($"Error fetching following: {response.StatusCode}");
-                    return null;
-                }
-            }
-            return list;
-        }
-
-        static string getCookie()
-        {
-            string cookie;
-            do
-            {
-                Console.Write("\nPlease input the full instagram cookie: ");
-                cookie = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(cookie))
-                {
-                    Console.WriteLine("Cookie cannot be empty. Please enter a valid cookie.");
-                }
-            } while (string.IsNullOrWhiteSpace(cookie));
-            return cookie;
-        }
-
-        static string getCsrftoken()
-        {
-            string csrftoken;
-            do
-            {
-                Console.Write("\nPlease input the csrtoken: ");
-                csrftoken = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(csrftoken))
-                {
-                    Console.WriteLine("Csrftoken cannot be empty. Please enter a valid csrftoken.");
-                }
-            } while (string.IsNullOrWhiteSpace(csrftoken));
-            return csrftoken;
-        }
-
-        static string? getUserPK(string cookie, string username)
-        {
-            string userPK;
-            var request = new RestRequest("api/v1/web/search/topsearch/", Method.Get);
-            request.AddHeader("cookie", cookie);
-            request.AddQueryParameter("query", username);
-            request.AddQueryParameter("context", "blended");
-            request.AddQueryParameter("include_reel", "false");
-            request.AddQueryParameter("search_surface", "web_top_search");
-            var response = client.Execute(request);
-            if (response.IsSuccessful)
-            {
-                Console.WriteLine("\nRequest to get user PK completed succesfully");
-                try
-                {
-                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                    userPK = obj.users[0].user.pk!;
-                    Console.WriteLine($"{username}: {userPK}\n");
-                    return userPK;
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine($"Error: {e.Message}");
-                    return null;
-                }
-            }
-            else
-            {
-                Console.Error.WriteLine($"\nError in request to get user PK (maybe cookie is invalid): {response.StatusCode}");
-                return null;
-            }
-        }
-
-        static int getFollowingCount(string userPK, string cookie, string csrftoken)
-        {
-            var request = new RestRequest("/graphql/query/", Method.Post);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.AddHeader("cookie", cookie);
-            request.AddHeader("x-csrftoken", csrftoken);
-            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7663723823674585", "application/x-www-form-urlencoded");
-            var response = client.Execute(request);
-            if (response.IsSuccessful)
-            {
-                try
-                {
-                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                    Console.WriteLine("Get following count request completed succesfully");
-                    return obj.data.user.following_count;
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine($"Error in get following count request: {e.Message}");
-                    return -1;
-                }
-            }
-            else
-            {
-                Console.Error.WriteLine($"Error in get following count request: {response.StatusCode}");
-                return -1;
-            }
-        }
-        static int getFollowerCount(string userPK, string cookie, string csrftoken)
-        {
-            var request = new RestRequest("/graphql/query/", Method.Post);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.AddHeader("cookie", cookie);
-            request.AddHeader("x-csrftoken", csrftoken);
-            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7663723823674585", "application/x-www-form-urlencoded");
-            var response = client.Execute(request);
-            if (response.IsSuccessful)
-            {
-                try
-                {
-                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                    Console.WriteLine("Get follower count request completed succesfully\n");
-                    return obj.data.user.follower_count;
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine($"Error in get follower count request: {e.Message}");
-                    return -1;
-                }
-            }
-            else
-            {
-                Console.Error.WriteLine($"Error in get follower count request: {response.StatusCode}");
-                return -1;
-            }
-        }
-
         static Dictionary<string, string>? getDataFromFile(string filename)
         {
             string jsonString = File.ReadAllText(filename);
@@ -293,22 +43,26 @@ namespace Stalkiana_Console
             }
         }
 
-        static void sleepRandom(int minTime, int maxTime)
-        {
-            Random rand = new Random();
-            Thread.Sleep(rand.Next(minTime, maxTime));
-        }
-
         static string dictionaryToJsonString(Dictionary<string, string> list)
         {
             var jsonArray = list.Select(kv => new { userPK = kv.Key, username = kv.Value }).ToArray();
             return JsonConvert.SerializeObject(jsonArray);
         }
 
+        static string getCsrftoken(string cookie)
+        {
+            string regex = @"(?<=csrftoken=)(\S+)(?=;)";
+            Match match = Regex.Match(cookie, regex);
+            string csrftoken = match.Value;
+            return csrftoken;
+        }
+
         static void Main(string[] args)
         {
-            var usersFollowing = new Dictionary<string, string>();
-            var usersFollowers = new Dictionary<string, string>();
+            Dictionary<string, string>? usersFollowing;
+            Dictionary<string, string>? usersFollowers;
+
+            Dictionary<string, string>? mediaList;
 
             var usersFollowingFile = new Dictionary<string, string>();
             var usersFollowersFile = new Dictionary<string, string>();
@@ -320,65 +74,66 @@ namespace Stalkiana_Console
             string option;
             string cookie;
             string csrftoken;
-            string count = "50";
+            int countUsers = 50;
+            int countMedia = 24;
             string? userPK;
 
-            int userFollowersCount;
+            int userFollowerCount;
             int userFollowingCount;
 
+            string configFile = "cookie.json";
 
-            displayStartingScreen();
+            UserInterface.displayStartingScreen();
 
             if (args.Length == 1)
             {
                 username = args[0];
             }
-            else if (args.Length == 2)
-            {
-                username = args[0];
-                if (Int32.TryParse(args[1], out int _out) && _out >= 1)
-                {
-                    count = args[1];
-                }
-            }
             else
             {
-                username = getUsername();
+                username = UserInterface.getUsername();
             }
 
-            option = getOption();
+            option = UserInterface.getOption();
 
             string followingFileName = $"{username}/{username}_followings.json";
             string followersFileName = $"{username}/{username}_followers.json";
             string resultFileName = $"{username}/result.txt";
 
-            cookie = getCookie();
-            csrftoken = getCsrftoken();
-            userPK = getUserPK(cookie, username);
-
-            if (userPK == null)
-            {
-                Console.Error.WriteLine("Something went wrong.");
-                return;
-            }
-
-            sleepRandom(minTime, maxTime);
-
             if (option == "1")
             {
-                downloadProfileImage(username, userPK, csrftoken);
-                client.Dispose();
+                cookie = UserInterface.getCookie(configFile);
+                csrftoken = getCsrftoken(cookie);
+                userPK = InstagramAPI.getUserPK(cookie, username);
+
+                if (userPK == null)
+                {
+                    Console.Error.WriteLine("Something went wrong.");
+                    return;
+                }
+
+                Directory.CreateDirectory(username);
+                string? profileImagePath = CreateNewFile($"{username}/{username}_profileImage.jpg", getMediaBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
+                Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in ./{profileImagePath}")}");
             }
 
             else if (option == "2")
             {
-                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n\n");
+                cookie = UserInterface.getCookie(configFile);
+                csrftoken = getCsrftoken(cookie);
+                userPK = InstagramAPI.getUserPK(cookie, username);
 
-                userFollowersCount = getFollowerCount(userPK, cookie, csrftoken);
-                sleepRandom(minTime, maxTime);
-                userFollowingCount = getFollowingCount(userPK, cookie, csrftoken);
+                if (userPK == null)
+                {
+                    Console.Error.WriteLine("Something went wrong.");
+                    return;
+                }
 
-                if (userFollowersCount < 1 || userFollowingCount < 1)
+                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following");
+
+                (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userPK, cookie, csrftoken);
+
+                if (userFollowerCount < 1 || userFollowingCount < 1)
                 {
                     Console.Error.WriteLine("Something went wrong.");
                     return;
@@ -391,27 +146,26 @@ namespace Stalkiana_Console
                 }
 
                 Console.WriteLine($"\nPrevious follower count: {usersFollowersFile!.Count}, previous following count: {usersFollowingFile!.Count}");
-                Console.WriteLine($"Current follower count:  {userFollowersCount}, current following count:  {userFollowingCount}\n");
+                Console.WriteLine($"Current follower count:  {userFollowerCount}, current following count:  {userFollowingCount}\n");
 
                 Console.WriteLine("Getting Following...");
-                usersFollowing = getFollowingList(userPK, cookie, minTime, maxTime, count);
+                usersFollowing = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "following");
 
                 if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 2)//Sometimes a few followings are not fetched
                 {
-                    Console.Error.WriteLine("Something went wrong while fetching Following.");
+                    Console.Error.WriteLine("Something went wrong while fetching Following");
                     return;
                 }
 
                 Console.WriteLine("Getting Followers...");
-                usersFollowers = getFollowersList(userPK, cookie, minTime, maxTime, count);
+                usersFollowers = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "followers");
 
-                if (usersFollowers == null || Math.Abs(userFollowersCount - usersFollowers.Count) >= 2)//Sometimes a few followers are not fetched
+                if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 2)//Sometimes a few followers are not fetched
                 {
-                    Console.Error.WriteLine("Something went wrong while fetching Followers.");
+                    Console.Error.WriteLine("Something went wrong while fetching Followers");
                     return;
                 }
 
-                client.Dispose();
                 Directory.CreateDirectory(username);
 
                 File.WriteAllText(followersFileName, dictionaryToJsonString(usersFollowers));
@@ -419,7 +173,7 @@ namespace Stalkiana_Console
 
                 Console.WriteLine("\n\nVerifying...\n");
 
-                resultLines.Add($"\n{DateTime.Now}: Current Follower count: {userFollowersCount}, Current Following count: {userFollowingCount}");
+                resultLines.Add($"\n{DateTime.Now}: Current Follower count: {userFollowerCount}, Current Following count: {userFollowingCount}");
                 resultLines.Add($"{DateTime.Now}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
                 Console.WriteLine($"\n{username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
 
@@ -486,67 +240,122 @@ namespace Stalkiana_Console
                 File.AppendAllLines(resultFileName, resultLines);
                 Console.WriteLine($"\nFinished successfully, results saved in ./{username}/results.txt");
             }
-            return;
-        }
-
-        static void downloadProfileImage(string username, string userPK, string csrftoken)
-        {
-            var request = new RestRequest("/graphql/query/", Method.Post);
-            request.AddHeader("x-csrftoken", csrftoken);
-            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=9718997071514355", "application/x-www-form-urlencoded");
-            var response = client.Execute(request);
-            if (!response.IsSuccessful)
+            else if (option == "3")
             {
-                Console.WriteLine($"Error in get profile image request: {response.StatusCode}");
-                return;
-            }
-            try
-            {
-                dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                string imageUrl = obj.data.user.hd_profile_pic_url_info.url.ToString();
-                byte[] fileBytes = client.DownloadData(new RestRequest(imageUrl, Method.Get))!;
-
-                Directory.CreateDirectory(username);
-                string? filePath = GenerateNewFileName($"{username}/{username}_profileImage.jpg", fileBytes);
-                if (filePath != null)
+                if (File.Exists($"{username}/result.txt"))
                 {
-                    Console.WriteLine($"\nThe profile picture was successfully saved in ./{filePath}");
+                    Console.WriteLine(File.ReadAllText($"{username}/result.txt"));
                 }
                 else
                 {
-                    Console.WriteLine("\nThe profile picture is unchanged. No new file created.");
+                    Console.WriteLine($"\nThe local history for {username} does not exist, please use the Get Followers/Following on {username} first to create the history.");
                 }
             }
-            catch (Exception e)
+            else if (option == "4")
             {
-                Console.WriteLine($"Error: {e.Message}");
-                return;
+                cookie = UserInterface.getCookie(configFile);
+                csrftoken = getCsrftoken(cookie);
+
+                mediaList = InstagramAPI.getMediaList(cookie, csrftoken, 250, 500, countMedia, username);
+
+                if (mediaList!.Count == 0 || mediaList == null)
+                {
+                    Console.WriteLine($"Error in fetching media");
+                    return;
+                }
+
+                string mediaInfo = "";
+
+                foreach (var media in mediaList)
+                {
+                    mediaInfo += media.Key + ": " + media.Value + "\n";
+                }
+
+                Directory.CreateDirectory($"{username}/media");
+                File.WriteAllText($"{username}/media.txt", mediaInfo);
+                Console.WriteLine("\nDownloading media...\n");
+
+                string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
+                foreach (var media in mediaList)
+                {
+                    byte[] mediaBytes = getMediaBytesFromUrl(media.Value)!;
+                    Match match = Regex.Match(media.Value, fileExtPattern);
+                    CreateNewFile($"{username}/media/{media.Key}{match.Value}", mediaBytes);
+                }
+
+                Console.WriteLine($"Media of {username} saved in ./{username}/media/ and the URLs were saved in ./{username}/media.txt");
+            }
+            return;
+        }
+
+        static byte[]? getMediaBytesFromUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return null;
+            }
+            using (var client = new RestClient())
+            {
+                return client.DownloadData(new RestRequest(url, Method.Get));
             }
         }
 
-        static string? GenerateNewFileName(string fullFilePath, byte[] newFileContent)
+        public static string? CreateNewFile(string desiredFullFilePath, byte[] newFileContent)
         {
-            int counter = 1;
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fullFilePath);
-            string fileExtension = Path.GetExtension(fullFilePath);
-            string directoryPath = Path.GetDirectoryName(fullFilePath)!;
-
-            fullFilePath = Path.Combine(directoryPath, $"{fileNameWithoutExtension}({counter}){fileExtension}");
-
-            while (File.Exists(fullFilePath))
+            if (string.IsNullOrEmpty(desiredFullFilePath))
             {
-                byte[] existingFileContent = File.ReadAllBytes(fullFilePath);
+                throw new ArgumentException("File path cannot be null or empty", nameof(desiredFullFilePath));
+            }
+            if (newFileContent == null)
+            {
+                throw new ArgumentNullException(nameof(newFileContent));
+            }
 
+            string? directoryPath = Path.GetDirectoryName(desiredFullFilePath);
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(desiredFullFilePath);
+            string fileExtension = Path.GetExtension(desiredFullFilePath);
+
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                directoryPath = Environment.CurrentDirectory;
+            }
+
+            if (!File.Exists(desiredFullFilePath))
+            {
+                File.WriteAllBytes(desiredFullFilePath, newFileContent);
+                return desiredFullFilePath;
+            }
+            else
+            {
+                byte[] existingFileContent = File.ReadAllBytes(desiredFullFilePath);
                 if (existingFileContent.SequenceEqual(newFileContent))
                 {
                     return null;
                 }
-
-                fullFilePath = Path.Combine(directoryPath, $"{fileNameWithoutExtension}({++counter}){fileExtension}");
             }
 
-            File.WriteAllBytes(fullFilePath, newFileContent);
-            return fullFilePath;
+            int counter = 1;
+            string currentFilePath;
+            while (true)
+            {
+                string newFileName = $"{fileNameWithoutExtension}({counter}){fileExtension}";
+                currentFilePath = Path.Combine(directoryPath, newFileName);
+
+                if (!File.Exists(currentFilePath))
+                {
+                    File.WriteAllBytes(currentFilePath, newFileContent);
+                    return currentFilePath;
+                }
+                else
+                {
+                    byte[] existingFileContent = File.ReadAllBytes(currentFilePath);
+                    if (existingFileContent.SequenceEqual(newFileContent))
+                    {
+                        return null;
+                    }
+                }
+                counter++;
+            }
         }
     }
 }

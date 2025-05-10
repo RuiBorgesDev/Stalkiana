@@ -15,22 +15,24 @@ A simple command-line tool for stalking an instagram account.
 
 - Get a list of followings and followers from a user;
 - Save and log if the user's following/follower count has changed;
+- Download all media/posts from a given public or private user;
 - Check who stopped/started following the user;
 - Check who the user stopped/started following;
 - Download profile pictures from a given public or private user;
-- Track multiple users at once with logs saved in different directories
+- Track multiple users at once with logs saved in different directories;
+- Set up cookies in a "cookie.json" file for ease of use;
 
 ## Prerequisites
 
 - .NET SDK 8.0 installed on your machine;
-- Instagram credentials (cookie and csrftoken);
+- Instagram cookies;
 
 ## Installation
 
 1. Clone this repository to your local machine:
 
    ```shell
-   git clone https://github.com/RuiPedroDev/Stalkiana
+   git clone https://github.com/RuiBorgesDev/Stalkiana
    ```
 
 2. Navigate to the project directory:
@@ -48,14 +50,16 @@ A simple command-line tool for stalking an instagram account.
 
 ## Information and Usage
 
-This tool has two main functions:
+This tool has three main functions:
 
 1- Downloading a profile picture (this works in both public and private instagram accounts).
 
-2- Tracking followers/followings by keeping a local list of the followers/followings of an instagram user and then upon execution check if the follower/following count has changed compared to the last execution time, if it changed it determines the difference by comparing the new list with the old list, when the tool finishes execution, it logs the results into a results.txt file.
+2- Downloading all media/posts (this works in both public and private instagram accounts).
 
-This tool requires the instagram cookie and csrftoken in order to work.
-If you don't know how to get the cookie and csrftoken, here are the steps to get it:
+3- Tracking followers/followings by keeping a local list of the followers/followings of an instagram user and then upon execution check if the follower/following count has changed compared to the last execution time, if it changed it determines the difference by comparing the new list with the old list, when the tool finishes execution, it logs the results into a results.txt file.
+
+This tool requires the instagram cookie in order to work.
+If you don't know how to get the cookie, here are the steps to get it:
 
 
 1. Launch your browser and open the inspect element panel (CTRL + SHIFT + C or F12).
@@ -70,4 +74,13 @@ If you don't know how to get the cookie and csrftoken, here are the steps to get
 4. Go to request headers and search for the cookie, triple click the full value and copy it.
 
 
-5. To get the csrftoken, in the same request, search for it and copy it.
+
+If you want to store the cookie so you dont have to paste it everytime you use the app, create a "cookie.json" file in the same directory where the program is running and make sure it has the following structure:
+
+```js
+{
+    "cookie": "YOUR_COOKIE_HERE"
+}
+```
+
+You might need to escape some special characters such as double quotes and backslashes in the cookie so that it is properly formated as a valid string.
