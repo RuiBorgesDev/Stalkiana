@@ -14,7 +14,6 @@ namespace Stalkiana_Console
     public class AppConfig
     {
         public string? cookie { get; set; }
-        public string? csrftoken { get; set; }
     }
     internal class Program
     {
@@ -108,7 +107,7 @@ namespace Stalkiana_Console
 
                 if (userPK == null)
                 {
-                    Console.Error.WriteLine("Something went wrong.");
+                    Console.Error.WriteLine("Something went wrong while getting user PK");
                     return;
                 }
 
@@ -125,7 +124,7 @@ namespace Stalkiana_Console
 
                 if (userPK == null)
                 {
-                    Console.Error.WriteLine("Something went wrong.");
+                    Console.Error.WriteLine("Something went wrong while getting user PK");
                     return;
                 }
 
@@ -135,7 +134,7 @@ namespace Stalkiana_Console
 
                 if (userFollowerCount < 1 || userFollowingCount < 1)
                 {
-                    Console.Error.WriteLine("Something went wrong.");
+                    Console.Error.WriteLine("Something went wrong while getting following and follower counts");
                     return;
                 }
 
@@ -143,6 +142,12 @@ namespace Stalkiana_Console
                 {
                     usersFollowingFile = getDataFromFile(followingFileName);
                     usersFollowersFile = getDataFromFile(followersFileName);
+                }
+
+                if (usersFollowingFile == null || usersFollowersFile == null)
+                {
+                    Console.Error.WriteLine("Something went wrong while getting local following and followers");
+                    return;
                 }
 
                 Console.WriteLine($"\nPrevious follower count: {usersFollowersFile!.Count}, previous following count: {usersFollowingFile!.Count}");
@@ -258,9 +263,9 @@ namespace Stalkiana_Console
 
                 mediaList = InstagramAPI.getMediaList(cookie, csrftoken, 250, 500, countMedia, username);
 
-                if (mediaList!.Count == 0 || mediaList == null)
+                if (mediaList == null || mediaList!.Count == 0)
                 {
-                    Console.WriteLine($"Error in fetching media");
+                    Console.Error.WriteLine($"Something went wrong while fetching media: {mediaList}");
                     return;
                 }
 
@@ -302,13 +307,9 @@ namespace Stalkiana_Console
 
         public static string? CreateNewFile(string desiredFullFilePath, byte[] newFileContent)
         {
-            if (string.IsNullOrEmpty(desiredFullFilePath))
+            if (string.IsNullOrEmpty(desiredFullFilePath) || newFileContent == null)
             {
-                throw new ArgumentException("File path cannot be null or empty", nameof(desiredFullFilePath));
-            }
-            if (newFileContent == null)
-            {
-                throw new ArgumentNullException(nameof(newFileContent));
+                return null;
             }
 
             string? directoryPath = Path.GetDirectoryName(desiredFullFilePath);

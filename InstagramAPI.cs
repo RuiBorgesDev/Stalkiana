@@ -140,7 +140,7 @@ namespace Stalkiana_Console
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine($"Error fetching media: {e.Message}");
+                    Console.Error.WriteLine($"Error in get media request (maybe cookie is invalid): {e.Message}");
                     return null;
                 }
                 sleepRandom(minTime, maxTime);
@@ -162,7 +162,7 @@ namespace Stalkiana_Console
 
             if (!response.IsSuccessful || response.Content == null)
             {
-                Console.Error.WriteLine($"\nError in request to get user PK (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid): {response.StatusCode}");
                 return null;
             }
             try
@@ -174,7 +174,7 @@ namespace Stalkiana_Console
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Error: {e.Message}");
+                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid): {e.Message}");
                 return null;
             }
         }
@@ -215,7 +215,7 @@ namespace Stalkiana_Console
 
             if (!response.IsSuccessful || response.Content == null)
             {
-                Console.WriteLine($"Error in get profile image request (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"Error in get profile image request (maybe cookie is invalid): {response.StatusCode}");
                 return null;
             }
             try
@@ -225,7 +225,7 @@ namespace Stalkiana_Console
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error: {e.Message}");
+                Console.Error.WriteLine($"Error in get profile image request (maybe cookie is invalid): {e.Message}");
                 return null;
             }
         }
