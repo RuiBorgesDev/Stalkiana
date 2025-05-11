@@ -21,7 +21,7 @@ A simple command-line tool for stalking an instagram account.
 - Check who the user stopped/started following;
 - Download profile pictures from a given public or private user;
 - Track multiple users at once with logs saved in different directories;
-- Set up cookies in a "cookie.json" file for ease of use;
+- Set up cookies in a "cookie.txt", "cookie.yaml" or "cookie.json" file for ease of use;
 
 ## Prerequisites
 
@@ -76,7 +76,23 @@ If you don't know how to get the cookie, here are the steps to get it:
 
 
 
-If you want to store the cookie so you dont have to paste it everytime you use the app, create a "cookie.json" file in the same directory where the program is running and make sure it has the following structure:
+If you want to store the cookie so you dont have to paste it everytime you use the app, create a "cookie.txt", "cookie.yaml" or "cookie.json" file (you can choose any of the formats) in the same directory where the program is running and make sure it has the following structure:
+
+if using cookie.txt use this format:
+
+```txt
+YOUR_COOKIE_HERE
+```
+
+
+if using cookie.yaml use this format:
+
+```yaml
+cookie: 'YOUR_COOKIE_HERE'
+```
+
+
+if using cookie.json use this format:
 
 ```js
 {
@@ -84,4 +100,4 @@ If you want to store the cookie so you dont have to paste it everytime you use t
 }
 ```
 
-You might need to escape some special characters such as double quotes and backslashes in the cookie so that it is properly formated as a valid string.
+You might need to escape some special characters such as double quotes and backslashes in the cookie if you are using the json format so that it is properly formated as a valid string.
