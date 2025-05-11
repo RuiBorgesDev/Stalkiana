@@ -159,7 +159,7 @@ namespace Stalkiana_Console
 
                 if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 2)//Sometimes a few followings are not fetched
                 {
-                    Console.Error.WriteLine("Something went wrong while fetching Following");
+                    Console.Error.WriteLine($"Something went wrong while fetching Following: {usersFollowing}");
                     return;
                 }
 
@@ -168,7 +168,7 @@ namespace Stalkiana_Console
 
                 if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 2)//Sometimes a few followers are not fetched
                 {
-                    Console.Error.WriteLine("Something went wrong while fetching Followers");
+                    Console.Error.WriteLine($"Something went wrong while fetching Followers: {usersFollowers}");
                     return;
                 }
 

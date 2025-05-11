@@ -16,7 +16,7 @@ A simple command-line tool for stalking an instagram account.
 - Get a list of followings and followers from a user;
 - Save and log if the user's following/follower count has changed;
 - Download all media/posts from a given public or private user;
-- Download all stories from a given public or private user;
+- Anonymously download all stories from a given public or private user;
 - Check who stopped/started following the user;
 - Check who the user stopped/started following;
 - Download profile pictures from a given public or private user;
