@@ -129,7 +129,7 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following");
+                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
 
                 (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userPK, cookie, csrftoken);
 
@@ -262,6 +262,8 @@ namespace Stalkiana_Console
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = getCsrftoken(cookie);
 
+                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
+
                 postList = InstagramAPI.getPostList(cookie, csrftoken, 250, 500, countPost, username);
 
                 if (postList == null || postList!.Count == 0)
@@ -296,6 +298,8 @@ namespace Stalkiana_Console
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = getCsrftoken(cookie);
                 userPK = InstagramAPI.getUserPK(cookie, username);
+
+                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
 
                 if (userPK == null)
                 {

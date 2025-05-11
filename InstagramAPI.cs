@@ -190,7 +190,6 @@ namespace Stalkiana_Console
             {
                 dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
                 userPK = obj.users[0].user.pk!;
-                Console.WriteLine($"{username}: {userPK}\n");
                 return userPK;
             }
             catch (Exception e)
