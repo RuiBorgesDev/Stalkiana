@@ -54,7 +54,7 @@ namespace Stalkiana_Console
 
                 try
                 {
-                    dynamic? obj = JsonConvert.DeserializeObject(response.Content!);
+                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
 
                     hasNext = type == "following" ? obj!.data.user.edge_follow.page_info.has_next_page : obj!.data.user.edge_followed_by.page_info.has_next_page;
                     after = type == "following" ? obj.data.user.edge_follow.page_info.end_cursor : obj.data.user.edge_followed_by.page_info.end_cursor;
@@ -84,7 +84,39 @@ namespace Stalkiana_Console
             return list;
         }
 
-        public static Dictionary<string, string>? getMediaList(string cookie, string csrftoken, int minTime, int maxTime, int count, string username)
+        public static Dictionary<string, string>? getStoriesList(string cookie, string csrftoken, string userPK)
+        {
+            var list = new Dictionary<string, string>();
+            var request = new RestRequest("/graphql/query/", Method.Post);
+            request.AddHeader("cookie", cookie);
+            request.AddHeader("x-csrftoken", csrftoken);
+            request.AddBody($"variables=%7B%22reel_ids_arr%22%3A%5B%22{userPK}%22%5D%7D&server_timestamps=true&doc_id=8010808625710156", "application/x-www-form-urlencoded");
+            var response = client.Execute(request);
+
+            if (!response.IsSuccessful || response.Content == null)
+            {
+                Console.Error.WriteLine($"Error in get stories request (maybe cookie is invalid): {response.StatusCode}");
+                return null;
+            }
+            try
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
+                dynamic items = obj.data.xdt_api__v1__feed__reels_media.reels_media[0].items;
+                foreach (dynamic item in items){
+                    string unixTime = item.taken_at;
+                    string url = item.video_versions == null ? item.image_versions2.candidates[0].url : item.video_versions[0].url;
+                    list[unixTime] = url;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Error in get stories request (maybe cookie is invalid): {e.Message}");
+                return null;
+            }
+            return list;
+        }
+
+        public static Dictionary<string, string>? getPostList(string cookie, string csrftoken, int minTime, int maxTime, int count, string username)
         {
             var list = new Dictionary<string, string>();
             string? after = null;
@@ -104,33 +136,21 @@ namespace Stalkiana_Console
 
                 try
                 {
-                    dynamic? obj = JsonConvert.DeserializeObject(response.Content!);
+                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
 
                     foreach (dynamic node in obj!.data.xdt_api__v1__feed__user_timeline_graphql_connection.edges)
                     {
                         string id = (string)node.node.id;
-                        string imgUrl = node.node.image_versions2.candidates[0].url;
-                        list[id] = imgUrl;
-
-                        if (node.node.video_versions != null)
-                        {
-                            string vidUrl = node.node.video_versions[0].url;
-                            list[id] = vidUrl;
-                        }
+                        string url = node.node.video_versions == null ? node.node.image_versions2.candidates[0].url : node.node.video_versions[0].url;
+                        list[id] = url;
 
                         if (node.node.carousel_media != null)
                         {
                             foreach (dynamic carousel_media in node.node.carousel_media)
                             {
                                 string carouselId = (string)carousel_media.id;
-                                string carouselImgUrl = carousel_media.image_versions2.candidates[0].url;
-                                list[carouselId] = carouselImgUrl;
-
-                                if (carousel_media.video_versions != null)
-                                {
-                                    string carouselVidUrl = carousel_media.video_versions[0].url;
-                                    list[(string)carousel_media.id] = carouselVidUrl;
-                                }
+                                string carouselUrl = carousel_media.video_versions == null ? carousel_media.image_versions2.candidates[0].url : carousel_media.video_versions[0].url;
+                                list[carouselId] = carouselUrl;
                             }
                         }
                     }

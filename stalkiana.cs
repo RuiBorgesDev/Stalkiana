@@ -61,7 +61,8 @@ namespace Stalkiana_Console
             Dictionary<string, string>? usersFollowing;
             Dictionary<string, string>? usersFollowers;
 
-            Dictionary<string, string>? mediaList;
+            Dictionary<string, string>? postList;
+            Dictionary<string, string>? storiesList;
 
             var usersFollowingFile = new Dictionary<string, string>();
             var usersFollowersFile = new Dictionary<string, string>();
@@ -74,7 +75,7 @@ namespace Stalkiana_Console
             string cookie;
             string csrftoken;
             int countUsers = 50;
-            int countMedia = 24;
+            int countPost = 24;
             string? userPK;
 
             int userFollowerCount;
@@ -112,7 +113,7 @@ namespace Stalkiana_Console
                 }
 
                 Directory.CreateDirectory(username);
-                string? profileImagePath = CreateNewFile($"{username}/{username}_profileImage.jpg", getMediaBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
+                string? profileImagePath = CreateNewFile($"{username}/{username}_profileImage.jpg", getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
                 Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in ./{profileImagePath}")}");
             }
 
@@ -261,39 +262,80 @@ namespace Stalkiana_Console
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = getCsrftoken(cookie);
 
-                mediaList = InstagramAPI.getMediaList(cookie, csrftoken, 250, 500, countMedia, username);
+                postList = InstagramAPI.getPostList(cookie, csrftoken, 250, 500, countPost, username);
 
-                if (mediaList == null || mediaList!.Count == 0)
+                if (postList == null || postList!.Count == 0)
                 {
-                    Console.Error.WriteLine($"Something went wrong while fetching media: {mediaList}");
+                    Console.Error.WriteLine($"Something went wrong while fetching posts: {postList}");
                     return;
                 }
 
-                string mediaInfo = "";
+                string postInfo = "";
 
-                foreach (var media in mediaList)
+                foreach (var post in postList)
                 {
-                    mediaInfo += media.Key + ": " + media.Value + "\n";
+                    postInfo += post.Key + ": " + post.Value + "\n";
                 }
 
-                Directory.CreateDirectory($"{username}/media");
-                File.WriteAllText($"{username}/media.txt", mediaInfo);
-                Console.WriteLine("\nDownloading media...\n");
+                Directory.CreateDirectory($"{username}/posts");
+                File.WriteAllText($"{username}/posts.txt", postInfo);
+                Console.WriteLine("\nDownloading posts...\n");
 
                 string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
-                foreach (var media in mediaList)
+                foreach (var post in postList)
                 {
-                    byte[] mediaBytes = getMediaBytesFromUrl(media.Value)!;
-                    Match match = Regex.Match(media.Value, fileExtPattern);
-                    CreateNewFile($"{username}/media/{media.Key}{match.Value}", mediaBytes);
+                    byte[] postBytes = getPostBytesFromUrl(post.Value)!;
+                    Match match = Regex.Match(post.Value, fileExtPattern);
+                    CreateNewFile($"{username}/posts/{post.Key}{match.Value}", postBytes);
                 }
 
-                Console.WriteLine($"Media of {username} saved in ./{username}/media/ and the URLs were saved in ./{username}/media.txt");
+                Console.WriteLine($"Post of {username} saved in ./{username}/posts/ and the URLs were saved in ./{username}/posts.txt");
+            }
+            else if (option == "5")
+            {
+                cookie = UserInterface.getCookie(configFile);
+                csrftoken = getCsrftoken(cookie);
+                userPK = InstagramAPI.getUserPK(cookie, username);
+
+                if (userPK == null)
+                {
+                    Console.Error.WriteLine("Something went wrong while getting user PK");
+                    return;
+                }
+
+                storiesList = InstagramAPI.getStoriesList(cookie, csrftoken, userPK);
+
+                if (storiesList == null || storiesList!.Count == 0)
+                {
+                    Console.Error.WriteLine($"Something went wrong while fetching stories: {storiesList}");
+                    return;
+                }
+
+                string storiesInfo = "";
+
+                foreach (var story in storiesList){
+                    storiesInfo += DateTimeOffset.FromUnixTimeSeconds(int.Parse(story.Key)).LocalDateTime.ToString() + ": " + story.Value + "\n";
+                }
+
+                Directory.CreateDirectory($"{username}/stories");
+                File.WriteAllText($"{username}/stories.txt", storiesInfo);
+
+                Console.WriteLine("\nDownloading stories...\n");
+
+                string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
+                foreach (var story in storiesList)
+                {
+                    byte[] storyBytes = getPostBytesFromUrl(story.Value)!;
+                    Match match = Regex.Match(story.Value, fileExtPattern);
+                    CreateNewFile($"{username}/stories/{story.Key}{match.Value}", storyBytes);
+                }
+
+                Console.WriteLine($"Stories of {username} saved in ./{username}/stories/ and the URLs were saved in ./{username}/stories.txt");
             }
             return;
         }
 
-        static byte[]? getMediaBytesFromUrl(string url)
+        static byte[]? getPostBytesFromUrl(string url)
         {
             if (string.IsNullOrEmpty(url))
             {
