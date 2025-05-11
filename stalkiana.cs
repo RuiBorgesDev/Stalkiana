@@ -314,11 +314,11 @@ namespace Stalkiana_Console
                 string storiesInfo = "";
 
                 foreach (var story in storiesList){
-                    storiesInfo += DateTimeOffset.FromUnixTimeSeconds(int.Parse(story.Key)).LocalDateTime.ToString() + ": " + story.Value + "\n";
+                    storiesInfo += story.Key + ": " + story.Value + "\n";
                 }
 
                 Directory.CreateDirectory($"{username}/stories");
-                File.WriteAllText($"{username}/stories.txt", storiesInfo);
+                File.AppendAllText($"{username}/stories.txt", storiesInfo);
 
                 Console.WriteLine("\nDownloading stories...\n");
 

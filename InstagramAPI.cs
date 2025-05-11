@@ -104,8 +104,9 @@ namespace Stalkiana_Console
                 dynamic items = obj.data.xdt_api__v1__feed__reels_media.reels_media[0].items;
                 foreach (dynamic item in items){
                     string unixTime = item.taken_at;
+                    string date = DateTimeOffset.FromUnixTimeSeconds(int.Parse(unixTime)).LocalDateTime.ToString("dd-MM-yyyy_HH\\hmm\\m");;
                     string url = item.video_versions == null ? item.image_versions2.candidates[0].url : item.video_versions[0].url;
-                    list[unixTime] = url;
+                    list[date] = url;
                 }
             }
             catch (Exception e)
