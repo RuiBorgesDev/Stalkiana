@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using YamlDotNet.Serialization;
 
 namespace Stalkiana_Console
 {
@@ -42,33 +43,76 @@ namespace Stalkiana_Console
                 Console.WriteLine("2- Get Followers/Following");
                 Console.WriteLine("3- Show Local History");
                 Console.WriteLine("4- Download Posts");
-                Console.WriteLine("5- Download Stories\n");
+                Console.WriteLine("5- Download Stories");
+                Console.WriteLine("6- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
                 if (string.IsNullOrWhiteSpace(option))
                 {
-                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1, 2, 3, 4, or 5)");
+                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1, 2, 3, 4, 5 or 6)");
                 }
-            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5");
+            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6");
             return option;
         }
 
         public static string getCookie(string configFile)
         {
-            string cookie;
-            if (File.Exists(configFile))
+            if (File.Exists(configFile + ".txt"))
             {
                 try
                 {
-                    AppConfig configObject = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(configFile))!;
-                    return configObject.cookie!.ToString();
+                    return File.ReadAllText(configFile + ".txt").Replace("\n", "");
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine("Error: " + ex.Message + "\nFallback to manual credentials.");
+                    Console.Error.WriteLine("Error reading TXT config: " + ex.Message + "\nFallback to manual credentials.");
+                }
+            }
+            else if (File.Exists(configFile + ".yaml"))
+            {
+                try
+                {
+                    string yamlFileFullPath = configFile + ".yaml";
+                    string yamlContent = File.ReadAllText(yamlFileFullPath);
+
+                    var deserializer = new DeserializerBuilder().Build();
+
+                    AppConfig configObject = deserializer.Deserialize<AppConfig>(yamlContent);
+                    if (configObject != null && configObject.cookie != null)
+                    {
+                        return configObject.cookie.ToString();
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Error: Cookie not found or is null in YAML config.\nFallback to manual credentials.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine("Error reading YAML config: " + ex.Message + "\nFallback to manual credentials.");
+                }
+            }
+            else if (File.Exists(configFile + ".json"))
+            {
+                try
+                {
+                    AppConfig configObject = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(configFile + ".json"))!;
+                    if (configObject != null && configObject.cookie != null)
+                    {
+                        return configObject.cookie.ToString();
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Error: Cookie not found or is null in JSON config.\nFallback to manual credentials.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine("Error reading JSON config: " + ex.Message + "\nFallback to manual credentials.");
                 }
             }
 
+            string cookie;
             do
             {
                 Console.Write("\nPlease input the full instagram cookie: ");

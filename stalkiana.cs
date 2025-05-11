@@ -4,9 +4,6 @@ Do not use the tool multiple times per day or you might get flagged by Instagram
 
 */
 
-using RestSharp;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 
 namespace Stalkiana_Console
@@ -17,45 +14,6 @@ namespace Stalkiana_Console
     }
     internal class Program
     {
-        static Dictionary<string, string>? getDataFromFile(string filename)
-        {
-            string jsonString = File.ReadAllText(filename);
-
-            try
-            {
-                var userList = JsonConvert.DeserializeObject<List<JObject>>(jsonString);
-                var dictionary = new Dictionary<string, string>();
-
-                foreach (JObject user in userList!)
-                {
-                    var userPK = user["userPK"]!.ToString();
-                    var username = user["username"]!.ToString();
-                    dictionary[userPK] = username;
-                }
-
-                return dictionary;
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("Error: " + ex.Message);
-                return null;
-            }
-        }
-
-        static string dictionaryToJsonString(Dictionary<string, string> list)
-        {
-            var jsonArray = list.Select(kv => new { userPK = kv.Key, username = kv.Value }).ToArray();
-            return JsonConvert.SerializeObject(jsonArray);
-        }
-
-        static string getCsrftoken(string cookie)
-        {
-            string regex = @"(?<=csrftoken=)(\S+)(?=;)";
-            Match match = Regex.Match(cookie, regex);
-            string csrftoken = match.Value;
-            return csrftoken;
-        }
-
         static void Main(string[] args)
         {
             Dictionary<string, string>? usersFollowing;
@@ -81,7 +39,7 @@ namespace Stalkiana_Console
             int userFollowerCount;
             int userFollowingCount;
 
-            string configFile = "cookie.json";
+            string configFile = "cookie";
 
             UserInterface.displayStartingScreen();
 
@@ -103,7 +61,7 @@ namespace Stalkiana_Console
             if (option == "1")
             {
                 cookie = UserInterface.getCookie(configFile);
-                csrftoken = getCsrftoken(cookie);
+                csrftoken = Helper.getCsrftoken(cookie);
                 userPK = InstagramAPI.getUserPK(cookie, username);
 
                 if (userPK == null)
@@ -113,14 +71,14 @@ namespace Stalkiana_Console
                 }
 
                 Directory.CreateDirectory(username);
-                string? profileImagePath = CreateNewFile($"{username}/{username}_profileImage.jpg", getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
+                string? profileImagePath = Helper.CreateNewFile($"{username}/{username}_profileImage.jpg", Helper.getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
                 Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in ./{profileImagePath}")}");
             }
 
             else if (option == "2")
             {
                 cookie = UserInterface.getCookie(configFile);
-                csrftoken = getCsrftoken(cookie);
+                csrftoken = Helper.getCsrftoken(cookie);
                 userPK = InstagramAPI.getUserPK(cookie, username);
 
                 if (userPK == null)
@@ -141,8 +99,8 @@ namespace Stalkiana_Console
 
                 if (File.Exists(followingFileName) && File.Exists(followersFileName))
                 {
-                    usersFollowingFile = getDataFromFile(followingFileName);
-                    usersFollowersFile = getDataFromFile(followersFileName);
+                    usersFollowingFile = Helper.getDataFromFile(followingFileName);
+                    usersFollowersFile = Helper.getDataFromFile(followersFileName);
                 }
 
                 if (usersFollowingFile == null || usersFollowersFile == null)
@@ -174,8 +132,8 @@ namespace Stalkiana_Console
 
                 Directory.CreateDirectory(username);
 
-                File.WriteAllText(followersFileName, dictionaryToJsonString(usersFollowers));
-                File.WriteAllText(followingFileName, dictionaryToJsonString(usersFollowing));
+                File.WriteAllText(followersFileName, Helper.dictionaryToJsonString(usersFollowers));
+                File.WriteAllText(followingFileName, Helper.dictionaryToJsonString(usersFollowing));
 
                 Console.WriteLine("\n\nVerifying...\n");
 
@@ -260,7 +218,7 @@ namespace Stalkiana_Console
             else if (option == "4")
             {
                 cookie = UserInterface.getCookie(configFile);
-                csrftoken = getCsrftoken(cookie);
+                csrftoken = Helper.getCsrftoken(cookie);
 
                 Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
 
@@ -286,9 +244,9 @@ namespace Stalkiana_Console
                 string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
                 foreach (var post in postList)
                 {
-                    byte[] postBytes = getPostBytesFromUrl(post.Value)!;
+                    byte[] postBytes = Helper.getPostBytesFromUrl(post.Value)!;
                     Match match = Regex.Match(post.Value, fileExtPattern);
-                    CreateNewFile($"{username}/posts/{post.Key}{match.Value}", postBytes);
+                    Helper.CreateNewFile($"{username}/posts/{post.Key}{match.Value}", postBytes);
                 }
 
                 Console.WriteLine($"Post of {username} saved in ./{username}/posts/ and the URLs were saved in ./{username}/posts.txt");
@@ -296,7 +254,7 @@ namespace Stalkiana_Console
             else if (option == "5")
             {
                 cookie = UserInterface.getCookie(configFile);
-                csrftoken = getCsrftoken(cookie);
+                csrftoken = Helper.getCsrftoken(cookie);
                 userPK = InstagramAPI.getUserPK(cookie, username);
 
                 Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
@@ -317,7 +275,8 @@ namespace Stalkiana_Console
 
                 string storiesInfo = "";
 
-                foreach (var story in storiesList){
+                foreach (var story in storiesList)
+                {
                     storiesInfo += story.Key + ": " + story.Value + "\n";
                 }
 
@@ -329,80 +288,20 @@ namespace Stalkiana_Console
                 string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
                 foreach (var story in storiesList)
                 {
-                    byte[] storyBytes = getPostBytesFromUrl(story.Value)!;
+                    byte[] storyBytes = Helper.getPostBytesFromUrl(story.Value)!;
                     Match match = Regex.Match(story.Value, fileExtPattern);
-                    CreateNewFile($"{username}/stories/{story.Key}{match.Value}", storyBytes);
+                    Helper.CreateNewFile($"{username}/stories/{story.Key}{match.Value}", storyBytes);
                 }
 
                 Console.WriteLine($"Stories of {username} saved in ./{username}/stories/ and the URLs were saved in ./{username}/stories.txt");
             }
+
+            else if (option == "6")
+            {
+                string path = Path.Combine(Directory.GetCurrentDirectory(), username);
+                Helper.OpenFolder(path);
+            }
             return;
-        }
-
-        static byte[]? getPostBytesFromUrl(string url)
-        {
-            if (string.IsNullOrEmpty(url))
-            {
-                return null;
-            }
-            using (var client = new RestClient())
-            {
-                return client.DownloadData(new RestRequest(url, Method.Get));
-            }
-        }
-
-        public static string? CreateNewFile(string desiredFullFilePath, byte[] newFileContent)
-        {
-            if (string.IsNullOrEmpty(desiredFullFilePath) || newFileContent == null)
-            {
-                return null;
-            }
-
-            string? directoryPath = Path.GetDirectoryName(desiredFullFilePath);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(desiredFullFilePath);
-            string fileExtension = Path.GetExtension(desiredFullFilePath);
-
-            if (string.IsNullOrEmpty(directoryPath))
-            {
-                directoryPath = Environment.CurrentDirectory;
-            }
-
-            if (!File.Exists(desiredFullFilePath))
-            {
-                File.WriteAllBytes(desiredFullFilePath, newFileContent);
-                return desiredFullFilePath;
-            }
-            else
-            {
-                byte[] existingFileContent = File.ReadAllBytes(desiredFullFilePath);
-                if (existingFileContent.SequenceEqual(newFileContent))
-                {
-                    return null;
-                }
-            }
-
-            int counter = 1;
-            string currentFilePath;
-            while (true)
-            {
-                string newFileName = $"{fileNameWithoutExtension}({counter}){fileExtension}";
-                currentFilePath = Path.Combine(directoryPath, newFileName);
-
-                if (!File.Exists(currentFilePath))
-                {
-                    File.WriteAllBytes(currentFilePath, newFileContent);
-                    return currentFilePath;
-                }
-                else
-                {
-                    byte[] existingFileContent = File.ReadAllBytes(currentFilePath);
-                    if (existingFileContent.SequenceEqual(newFileContent))
-                    {
-                        return null;
-                    }
-                }
-                counter++;
-            }
         }
     }
 }

@@ -6,4 +6,6 @@ bin/
 obj/
 .vscode/
 *.json
+*.txt
+*.yaml
 */
