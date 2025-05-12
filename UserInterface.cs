@@ -44,14 +44,15 @@ namespace Stalkiana_Console
                 Console.WriteLine("3- Show Local History");
                 Console.WriteLine("4- Download Posts");
                 Console.WriteLine("5- Download Stories");
-                Console.WriteLine("6- Open Folder\n");
+                Console.WriteLine("6- Get User Primary Key");
+                Console.WriteLine("7- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
                 if (string.IsNullOrWhiteSpace(option))
                 {
-                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1, 2, 3, 4, 5 or 6)");
+                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1, 2, 3, 4, 5, 6 or 7)");
                 }
-            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6");
+            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6" && option != "7");
             return option;
         }
 

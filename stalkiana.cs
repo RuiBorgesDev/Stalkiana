@@ -26,14 +26,14 @@ namespace Stalkiana_Console
             var usersFollowersFile = new Dictionary<string, string>();
             var resultLines = new List<string>();
 
-            const int minTime = 1000;
-            const int maxTime = 2500;
+            const int minTime = 100;
+            const int maxTime = 250;
             string username;
             string option;
             string cookie;
             string csrftoken;
-            int countUsers = 50;
-            int countPost = 24;
+            int countUsers = 64;
+            int countPost = 28;
             string? userPK;
 
             int userFollowerCount;
@@ -115,18 +115,18 @@ namespace Stalkiana_Console
                 Console.WriteLine("Getting Following...");
                 usersFollowing = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "following");
 
-                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 2)//Sometimes a few followings are not fetched
+                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 3)//Sometimes a few followings are not fetched
                 {
-                    Console.Error.WriteLine($"Something went wrong while fetching Following: {usersFollowing}");
+                    Console.Error.WriteLine($"Something went wrong while fetching following: {usersFollowing}");
                     return;
                 }
 
                 Console.WriteLine("Getting Followers...");
                 usersFollowers = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "followers");
 
-                if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 2)//Sometimes a few followers are not fetched
+                if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 3)//Sometimes a few followers are not fetched
                 {
-                    Console.Error.WriteLine($"Something went wrong while fetching Followers: {usersFollowers}");
+                    Console.Error.WriteLine($"Something went wrong while fetching followers: {usersFollowers}");
                     return;
                 }
 
@@ -135,59 +135,25 @@ namespace Stalkiana_Console
                 File.WriteAllText(followersFileName, Helper.dictionaryToJsonString(usersFollowers));
                 File.WriteAllText(followingFileName, Helper.dictionaryToJsonString(usersFollowing));
 
-                Console.WriteLine("\n\nVerifying...\n");
-
                 resultLines.Add($"\n{DateTime.Now}: Current Follower count: {userFollowerCount}, Current Following count: {userFollowingCount}");
                 resultLines.Add($"{DateTime.Now}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
                 Console.WriteLine($"\n{username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
 
-                foreach (var user in usersFollowingFile)
-                {
-                    if (!usersFollowing.ContainsKey(user.Key))
-                    {
-                        resultLines.Add($"{username} stopped following {user.Value}");
-                        Console.WriteLine($"{username} stopped following {user.Value}");
-                    }
-                }
-
-                foreach (var user in usersFollowing)
-                {
-                    if (!usersFollowingFile.ContainsKey(user.Key))
-                    {
-                        resultLines.Add($"{username} started following {user.Value}");
-                        Console.WriteLine($"{username} started following {user.Value}");
-                    }
-                }
+                resultLines.AddRange(Helper.compareLists(usersFollowersFile, usersFollowers, username, "followers"));
 
                 resultLines.Add($"{DateTime.Now}: {(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
                 Console.WriteLine($"\n{(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
 
-                foreach (var user in usersFollowersFile)
-                {
-                    if (!usersFollowers.ContainsKey(user.Key))
-                    {
-                        resultLines.Add($"{user.Value} stopped following {username}");
-                        Console.WriteLine($"{user.Value} stopped following {username}");
-                    }
-                }
+                resultLines.AddRange(Helper.compareLists(usersFollowingFile, usersFollowing, username, "following"));
 
-                foreach (var user in usersFollowers)
-                {
-                    if (!usersFollowersFile.ContainsKey(user.Key))
-                    {
-                        resultLines.Add($"{user.Value} started following {username}");
-                        Console.WriteLine($"{user.Value} started following {username}");
-                    }
-                }
-
-                resultLines.Add($"{DateTime.Now}: Name changes");
-                Console.WriteLine("\nName changes");
+                bool hasNameChanges = false;
 
                 foreach (var user in usersFollowersFile)
                 {
                     if (usersFollowers.ContainsKey(user.Key) && usersFollowers[user.Key] != usersFollowersFile[user.Key])
                     {
-                        resultLines.Add($"{user.Value} changed their username to {usersFollowers[user.Key]}");
+                        hasNameChanges = true;
+                        resultLines.Add($"{DateTime.Now}: {user.Value} changed their username to {usersFollowers[user.Key]}");
                         Console.WriteLine($"{user.Value} changed their username to {usersFollowers[user.Key]}");
                     }
                 }
@@ -196,9 +162,15 @@ namespace Stalkiana_Console
                 {
                     if (usersFollowing.ContainsKey(user.Key) && usersFollowing[user.Key] != usersFollowingFile[user.Key])
                     {
-                        resultLines.Add($"{user.Value} changed their username to {usersFollowing[user.Key]}");
+                        hasNameChanges = true;
+                        resultLines.Add($"{DateTime.Now}: {user.Value} changed their username to {usersFollowing[user.Key]}");
                         Console.WriteLine($"{user.Value} changed their username to {usersFollowing[user.Key]}");
                     }
+                }
+
+                if(!hasNameChanges){
+                    resultLines.Add($"{DateTime.Now}: There are no name changes");
+                    Console.WriteLine("\nThere are no name changes");
                 }
 
                 File.AppendAllLines(resultFileName, resultLines);
@@ -297,6 +269,14 @@ namespace Stalkiana_Console
             }
 
             else if (option == "6")
+            {
+                cookie = UserInterface.getCookie(configFile);
+                userPK = InstagramAPI.getUserPK(cookie, username);
+
+                Console.WriteLine($"\n{username} has the Primary Key: {userPK}\n");
+            }
+
+            else if (option == "7")
             {
                 string path = Path.Combine(Directory.GetCurrentDirectory(), username);
                 Helper.OpenFolder(path);

@@ -46,9 +46,9 @@ namespace Stalkiana_Console
                 request.AddHeader("cookie", cookie);
                 var response = client.Execute(request);
 
-                if (!response.IsSuccessful || response.Content == null)
+                if (!response.IsSuccessful)
                 {
-                    Console.Error.WriteLine($"Error fetching {type}: {response.StatusCode}");
+                    Console.Error.WriteLine($"Error fetching {type} (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                     return null;
                 }
 
@@ -93,9 +93,9 @@ namespace Stalkiana_Console
             request.AddBody($"variables=%7B%22reel_ids_arr%22%3A%5B%22{userPK}%22%5D%7D&server_timestamps=true&doc_id=8010808625710156", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
 
-            if (!response.IsSuccessful || response.Content == null)
+            if (!response.IsSuccessful)
             {
-                Console.Error.WriteLine($"Error in get stories request (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"Error in get stories request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                 return null;
             }
             try
@@ -104,7 +104,7 @@ namespace Stalkiana_Console
                 dynamic items = obj.data.xdt_api__v1__feed__reels_media.reels_media[0].items;
                 foreach (dynamic item in items){
                     string unixTime = item.taken_at;
-                    string date = DateTimeOffset.FromUnixTimeSeconds(int.Parse(unixTime)).LocalDateTime.ToString("dd-MM-yyyy_HH\\hmm\\m");;
+                    string date = DateTimeOffset.FromUnixTimeSeconds(int.Parse(unixTime)).LocalDateTime.ToString("dd-MM-yyyy_HH\\hmm\\mss\\s");
                     string url = item.video_versions == null ? item.image_versions2.candidates[0].url : item.video_versions[0].url;
                     list[date] = url;
                 }
@@ -129,9 +129,9 @@ namespace Stalkiana_Console
                 request.AddBody($"variables=%7B%22after%22%3A%22{(after == null ? "null" : after)}%22%2C%22before%22%3Anull%2C%22data%22%3A%7B%22count%22%3A{count}%2C%22include_reel_media_seen_timestamp%22%3Atrue%2C%22include_relationship_info%22%3Atrue%2C%22latest_besties_reel_media%22%3Atrue%2C%22latest_reel_media%22%3Atrue%7D%2C%22first%22%3A{count}%2C%22last%22%3Anull%2C%22username%22%3A%22{username}%22%2C%22__relay_internal__pv__PolarisIsLoggedInrelayprovider%22%3Atrue%2C%22__relay_internal__pv__PolarisShareSheetV3relayprovider%22%3Atrue%7D&server_timestamps=true&doc_id=9333503846778781", "application/x-www-form-urlencoded");
                 var response = client.Execute(request);
 
-                if (!response.IsSuccessful || response.Content == null)
+                if (!response.IsSuccessful)
                 {
-                    Console.Error.WriteLine($"Error in get media request (maybe cookie is invalid): {response.StatusCode}");
+                    Console.Error.WriteLine($"Error in get media request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                     return null;
                 }
 
@@ -181,9 +181,9 @@ namespace Stalkiana_Console
             request.AddQueryParameter("search_surface", "web_top_search");
             var response = client.Execute(request);
 
-            if (!response.IsSuccessful || response.Content == null)
+            if (!response.IsSuccessful)
             {
-                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                 return null;
             }
             try
@@ -208,9 +208,9 @@ namespace Stalkiana_Console
             request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=7663723823674585", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
 
-            if (!response.IsSuccessful || response.Content == null)
+            if (!response.IsSuccessful)
             {
-                Console.Error.WriteLine($"Error in get following and followers count request (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"Error in get following and followers count request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                 return (-1, -1);
             }
 
@@ -233,9 +233,9 @@ namespace Stalkiana_Console
             request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=9718997071514355", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
 
-            if (!response.IsSuccessful || response.Content == null)
+            if (!response.IsSuccessful)
             {
-                Console.Error.WriteLine($"Error in get profile image request (maybe cookie is invalid): {response.StatusCode}");
+                Console.Error.WriteLine($"Error in get profile image request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
                 return null;
             }
             try

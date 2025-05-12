@@ -9,6 +9,57 @@ namespace Stalkiana_Console
 {
     public class Helper
     {
+        public static List<string> compareLists(Dictionary<string, string> userList1, Dictionary<string, string> userList2, string username, string compareType)
+        {
+            var lines = new List<string>();
+
+            foreach (var user in userList1)
+            {
+                if (!userList2.ContainsKey(user.Key))
+                {
+                    string content = "";
+
+                    switch (compareType)
+                    {
+                        case "following":
+                            content = $"{username} stopped following {user.Value}";
+                            break;
+
+                        case "followers":
+                            content = $"{user.Value} stopped following {username}";
+                            break;
+                    }
+
+                    lines.Add(content);
+                    Console.WriteLine(content);
+                }
+            }
+
+            foreach (var user in userList2)
+            {
+                if (!userList1.ContainsKey(user.Key))
+                {
+                    string content = "";
+
+                    switch (compareType)
+                    {
+                        case "following":
+                            content = $"{username} started following {user.Value}";
+                            break;
+
+                        case "followers":
+                            content = $"{user.Value} started following {username}";
+                            break;
+                    }
+
+                    lines.Add(content);
+                    Console.WriteLine(content);
+                }
+            }
+
+            return lines;
+        }
+
         public static Dictionary<string, string>? getDataFromFile(string filename)
         {
             string jsonString = File.ReadAllText(filename);
