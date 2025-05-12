@@ -87,7 +87,7 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
+                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
                 (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userPK, cookie, csrftoken);
 
@@ -109,7 +109,7 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                Console.WriteLine($"\nPrevious follower count: {usersFollowersFile!.Count}, previous following count: {usersFollowingFile!.Count}");
+                Console.WriteLine($"Previous follower count: {usersFollowersFile!.Count}, previous following count: {usersFollowingFile!.Count}");
                 Console.WriteLine($"Current follower count:  {userFollowerCount}, current following count:  {userFollowingCount}\n");
 
                 Console.WriteLine("Getting Following...");
@@ -220,7 +220,7 @@ namespace Stalkiana_Console
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
 
-                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
+                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
                 postList = InstagramAPI.getPostList(cookie, csrftoken, 250, 500, countPost, username);
 
@@ -257,7 +257,7 @@ namespace Stalkiana_Console
                 csrftoken = Helper.getCsrftoken(cookie);
                 userPK = InstagramAPI.getUserPK(cookie, username);
 
-                Console.WriteLine("This only works on public instagram accounts or on private accounts that you are following");
+                Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
                 if (userPK == null)
                 {

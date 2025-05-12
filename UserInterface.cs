@@ -68,11 +68,11 @@ namespace Stalkiana_Console
                     Console.Error.WriteLine("Error reading TXT config: " + ex.Message + "\nFallback to manual credentials.");
                 }
             }
-            else if (File.Exists(configFile + ".yaml"))
+            else if (File.Exists(configFile + ".yaml") || File.Exists(configFile + ".yml"))
             {
                 try
                 {
-                    string yamlFileFullPath = configFile + ".yaml";
+                    string yamlFileFullPath = File.Exists(configFile + ".yaml") ? configFile + ".yaml" : configFile + ".yml";
                     string yamlContent = File.ReadAllText(yamlFileFullPath);
 
                     var deserializer = new DeserializerBuilder().Build();
