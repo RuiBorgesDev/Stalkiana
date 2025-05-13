@@ -9,6 +9,4 @@ obj/
 *.txt
 *.yaml
 *.yml
-*.sh
-*.ps1
 */
