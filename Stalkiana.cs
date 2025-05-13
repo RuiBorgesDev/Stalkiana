@@ -135,13 +135,13 @@ namespace Stalkiana_Console
                 File.WriteAllText(followersFileName, Helper.dictionaryToJsonString(usersFollowers));
                 File.WriteAllText(followingFileName, Helper.dictionaryToJsonString(usersFollowing));
 
-                resultLines.Add($"\n{DateTime.Now}: Current Follower count: {userFollowerCount}, Current Following count: {userFollowingCount}");
-                resultLines.Add($"{DateTime.Now}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
+                resultLines.Add($"\n{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: Current Follower count: {userFollowerCount}, Current Following count: {userFollowingCount}");
+                resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
                 Console.WriteLine($"\n{username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
 
                 resultLines.AddRange(Helper.compareLists(usersFollowersFile, usersFollowers, username, "followers"));
 
-                resultLines.Add($"{DateTime.Now}: {(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
+                resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: {(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
                 Console.WriteLine($"\n{(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
 
                 resultLines.AddRange(Helper.compareLists(usersFollowingFile, usersFollowing, username, "following"));
@@ -153,7 +153,7 @@ namespace Stalkiana_Console
                     if (usersFollowers.ContainsKey(user.Key) && usersFollowers[user.Key] != usersFollowersFile[user.Key])
                     {
                         hasNameChanges = true;
-                        resultLines.Add($"{DateTime.Now}: {user.Value} changed their username to {usersFollowers[user.Key]}");
+                        resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: {user.Value} changed their username to {usersFollowers[user.Key]}");
                         Console.WriteLine($"{user.Value} changed their username to {usersFollowers[user.Key]}");
                     }
                 }
@@ -163,13 +163,13 @@ namespace Stalkiana_Console
                     if (usersFollowing.ContainsKey(user.Key) && usersFollowing[user.Key] != usersFollowingFile[user.Key])
                     {
                         hasNameChanges = true;
-                        resultLines.Add($"{DateTime.Now}: {user.Value} changed their username to {usersFollowing[user.Key]}");
+                        resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: {user.Value} changed their username to {usersFollowing[user.Key]}");
                         Console.WriteLine($"{user.Value} changed their username to {usersFollowing[user.Key]}");
                     }
                 }
 
                 if(!hasNameChanges){
-                    resultLines.Add($"{DateTime.Now}: There are no name changes");
+                    resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: There are no name changes");
                     Console.WriteLine("\nThere are no name changes");
                 }
 
