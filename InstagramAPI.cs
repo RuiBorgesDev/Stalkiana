@@ -102,7 +102,8 @@ namespace Stalkiana_Console
             {
                 dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
                 dynamic items = obj.data.xdt_api__v1__feed__reels_media.reels_media[0].items;
-                foreach (dynamic item in items){
+                foreach (dynamic item in items)
+                {
                     string unixTime = item.taken_at;
                     string date = DateTimeOffset.FromUnixTimeSeconds(int.Parse(unixTime)).LocalDateTime.ToString("dd-MM-yyyy_HH\\hmm\\mss\\s");
                     string url = item.video_versions == null ? item.image_versions2.candidates[0].url : item.video_versions[0].url;
@@ -170,31 +171,28 @@ namespace Stalkiana_Console
 
             return list;
         }
-        public static string? getUserPK(string cookie, string username)
+        public static string? getUserID(string username)
         {
             string userPK;
-            var request = new RestRequest("api/v1/web/search/topsearch/", Method.Get);
-            request.AddHeader("cookie", cookie);
-            request.AddQueryParameter("query", username);
-            request.AddQueryParameter("context", "blended");
-            request.AddQueryParameter("include_reel", "false");
-            request.AddQueryParameter("search_surface", "web_top_search");
+            var request = new RestRequest("api/v1/users/web_profile_info/", Method.Get);
+            request.AddHeader("x-ig-app-id", "936619743392459");
+            request.AddQueryParameter("username", username);
             var response = client.Execute(request);
 
             if (!response.IsSuccessful)
             {
-                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
+                Console.Error.WriteLine($"\nError in get user PK request\nStatus code: {response.StatusCode}");
                 return null;
             }
             try
             {
                 dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                userPK = obj.users[0].user.pk!;
+                userPK = obj.data.user.id;
                 return userPK;
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"\nError in get user PK request (maybe cookie is invalid): {e.Message}");
+                Console.Error.WriteLine($"\nError in get user PK request: {e.Message}");
                 return null;
             }
         }

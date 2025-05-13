@@ -10,5 +10,5 @@ obj/
 *.yaml
 *.yml
 *.sh
-*.psl
+*.ps1
 */

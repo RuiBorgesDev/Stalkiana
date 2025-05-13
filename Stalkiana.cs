@@ -62,7 +62,7 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserPK(cookie, username);
+                userPK = InstagramAPI.getUserID(username);
 
                 if (userPK == null)
                 {
@@ -79,7 +79,7 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserPK(cookie, username);
+                userPK = InstagramAPI.getUserID(username);
 
                 if (userPK == null)
                 {
@@ -227,7 +227,7 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserPK(cookie, username);
+                userPK = InstagramAPI.getUserID(username);
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
@@ -270,10 +270,10 @@ namespace Stalkiana_Console
 
             else if (option == "6")
             {
-                cookie = UserInterface.getCookie(configFile);
-                userPK = InstagramAPI.getUserPK(cookie, username);
+                Console.WriteLine("Getting user ID...\n");
+                userPK = InstagramAPI.getUserID(username);
 
-                Console.WriteLine($"\n{username} has the Primary Key: {userPK}\n");
+                Console.WriteLine($"\n{username} has the ID: {userPK}\n");
             }
 
             else if (option == "7")

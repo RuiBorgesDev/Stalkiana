@@ -44,7 +44,7 @@ namespace Stalkiana_Console
                 Console.WriteLine("3- Show Local History");
                 Console.WriteLine("4- Download Posts");
                 Console.WriteLine("5- Download Stories");
-                Console.WriteLine("6- Get User Primary Key");
+                Console.WriteLine("6- Get User ID");
                 Console.WriteLine("7- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
