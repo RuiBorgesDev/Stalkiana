@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
 namespace Stalkiana_Console
@@ -91,25 +90,6 @@ namespace Stalkiana_Console
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine("Error reading YAML config: " + ex.Message + "\nFallback to manual credentials.");
-                }
-            }
-            else if (File.Exists(configFile + ".json"))
-            {
-                try
-                {
-                    AppConfig configObject = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(configFile + ".json"))!;
-                    if (configObject != null && configObject.cookie != null)
-                    {
-                        return configObject.cookie.ToString();
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("Error: Cookie not found or is null in JSON config.\nFallback to manual credentials.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine("Error reading JSON config: " + ex.Message + "\nFallback to manual credentials.");
                 }
             }
 
