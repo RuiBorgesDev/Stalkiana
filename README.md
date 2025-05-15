@@ -73,20 +73,3 @@ If you don't know how to get the cookie, here are the steps to get it:
 
 
 4. Go to request headers and search for the cookie, triple click the full value and copy it.
-
-
-
-If you want to store the cookie so you dont have to paste it everytime you use the app, create a "cookie.txt", "cookie.yaml" file (you can choose any of the formats) in the same directory where the program is running and make sure it has the following structure:
-
-if using cookie.txt use this format:
-
-```txt
-YOUR_COOKIE_HERE
-```
-
-
-if using cookie.yaml use this format:
-
-```yaml
-cookie: 'YOUR_COOKIE_HERE'
-```
