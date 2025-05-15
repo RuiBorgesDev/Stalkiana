@@ -44,15 +44,31 @@ namespace Stalkiana_Console
                 Console.WriteLine("4- Download Posts");
                 Console.WriteLine("5- Download Stories");
                 Console.WriteLine("6- Get User ID");
-                Console.WriteLine("7- Open Folder\n");
+                Console.WriteLine("7- Save Cookie");
+                Console.WriteLine("8- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
                 if (string.IsNullOrWhiteSpace(option))
                 {
-                    Console.WriteLine("Option cannot be empty. Please enter a valid option (1, 2, 3, 4, 5, 6 or 7)");
+                    Console.WriteLine("Option cannot be empty. Please enter a valid option");
                 }
-            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6" && option != "7");
+            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6" && option != "7" && option != "8");
             return option;
+        }
+
+        public static string getCookieInput()
+        {
+            string cookie;
+            do
+            {
+                Console.Write("\nPlease input the full instagram cookie: ");
+                cookie = Console.ReadLine()!;
+                if (string.IsNullOrWhiteSpace(cookie))
+                {
+                    Console.WriteLine("Cookie cannot be empty. Please enter a valid cookie.");
+                }
+            } while (string.IsNullOrWhiteSpace(cookie));
+            return cookie;
         }
 
         public static string getCookie(string configFile)
@@ -93,17 +109,7 @@ namespace Stalkiana_Console
                 }
             }
 
-            string cookie;
-            do
-            {
-                Console.Write("\nPlease input the full instagram cookie: ");
-                cookie = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(cookie))
-                {
-                    Console.WriteLine("Cookie cannot be empty. Please enter a valid cookie.");
-                }
-            } while (string.IsNullOrWhiteSpace(cookie));
-            return cookie;
+            return getCookieInput();
         }
     }
 }
