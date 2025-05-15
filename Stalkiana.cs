@@ -12,17 +12,14 @@ namespace Stalkiana_Console
     {
         static void Main(string[] args)
         {
-            Dictionary<string, string>? postList;
-            Dictionary<string, string>? storiesList;
-
             const int minTime = 100;
             const int maxTime = 250;
             string username;
             string option;
             string cookie;
             string csrftoken;
-            int countUsers = 64;
-            int countPost = 28;
+            const int countUsers = 64;
+            const int countPost = 28;
             string? userID;
 
             int userFollowerCount;
@@ -191,7 +188,9 @@ namespace Stalkiana_Console
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
-                postList = InstagramAPI.getPostList(cookie, csrftoken, 250, 500, countPost, username);
+                Dictionary<string, string>? postList;
+
+                postList = InstagramAPI.getPostList(cookie, csrftoken, minTime, maxTime, countPost, username);
 
                 if (postList == null || postList!.Count == 0)
                 {
@@ -227,6 +226,8 @@ namespace Stalkiana_Console
                 userID = InstagramAPI.getUserID(username);
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
+
+                Dictionary<string, string>? storiesList;
 
                 if (userID == null)
                 {
@@ -269,6 +270,12 @@ namespace Stalkiana_Console
             {
                 Console.WriteLine("Getting user ID...\n");
                 userID = InstagramAPI.getUserID(username);
+
+                if (userID == null)
+                {
+                    Console.Error.WriteLine("Something went wrong while getting user ID");
+                    return;
+                }
 
                 Console.WriteLine($"\n{username} has the ID: {userID}\n");
             }
