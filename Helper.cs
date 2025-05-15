@@ -71,23 +71,23 @@ namespace Stalkiana_Console
 
                 foreach (JObject user in userList!)
                 {
-                    var userPK = user["userPK"]!.ToString();
+                    var userID = user["userID"]!.ToString();
                     var username = user["username"]!.ToString();
-                    dictionary[userPK] = username;
+                    dictionary[userID] = username;
                 }
 
                 return dictionary;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("Error: " + ex.Message);
+                Console.Error.WriteLine("Something went wrong while reading data from file: " + ex.Message);
                 return null;
             }
         }
 
         public static string dictionaryToJsonString(Dictionary<string, string> list)
         {
-            var jsonArray = list.Select(kv => new { userPK = kv.Key, username = kv.Value }).ToArray();
+            var jsonArray = list.Select(kv => new { userID = kv.Key, username = kv.Value }).ToArray();
             return JsonConvert.SerializeObject(jsonArray);
         }
 
@@ -225,5 +225,4 @@ namespace Stalkiana_Console
             }
         }
     }
-
 }

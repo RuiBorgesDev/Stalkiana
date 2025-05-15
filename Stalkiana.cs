@@ -8,23 +8,12 @@ using System.Text.RegularExpressions;
 
 namespace Stalkiana_Console
 {
-    public class AppConfig
-    {
-        public string? cookie { get; set; }
-    }
     internal class Program
     {
         static void Main(string[] args)
         {
-            Dictionary<string, string>? usersFollowing;
-            Dictionary<string, string>? usersFollowers;
-
             Dictionary<string, string>? postList;
             Dictionary<string, string>? storiesList;
-
-            var usersFollowingFile = new Dictionary<string, string>();
-            var usersFollowersFile = new Dictionary<string, string>();
-            var resultLines = new List<string>();
 
             const int minTime = 100;
             const int maxTime = 250;
@@ -34,7 +23,7 @@ namespace Stalkiana_Console
             string csrftoken;
             int countUsers = 64;
             int countPost = 28;
-            string? userPK;
+            string? userID;
 
             int userFollowerCount;
             int userFollowingCount;
@@ -62,16 +51,16 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserID(username);
+                userID = InstagramAPI.getUserID(username);
 
-                if (userPK == null)
+                if (userID == null)
                 {
-                    Console.Error.WriteLine("Something went wrong while getting user PK");
+                    Console.Error.WriteLine("Something went wrong while getting user ID");
                     return;
                 }
 
                 Directory.CreateDirectory(username);
-                string? profileImagePath = Helper.CreateNewFile($"{username}/{username}_profileImage.jpg", Helper.getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userPK, csrftoken)!)!);
+                string? profileImagePath = Helper.CreateNewFile($"{username}/{username}_profileImage.jpg", Helper.getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userID, csrftoken)!)!);
                 Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in ./{profileImagePath}")}");
             }
 
@@ -79,17 +68,21 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserID(username);
+                userID = InstagramAPI.getUserID(username);
 
-                if (userPK == null)
+                if (userID == null)
                 {
-                    Console.Error.WriteLine("Something went wrong while getting user PK");
+                    Console.Error.WriteLine("Something went wrong while getting user ID");
                     return;
                 }
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
-                (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userPK, cookie, csrftoken);
+                var usersFollowingFile = new Dictionary<string, string>();
+                var usersFollowersFile = new Dictionary<string, string>();
+                var resultLines = new List<string>();
+
+                (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userID, cookie, csrftoken);
 
                 if (userFollowerCount < 1 || userFollowingCount < 1)
                 {
@@ -112,8 +105,11 @@ namespace Stalkiana_Console
                 Console.WriteLine($"Previous follower count: {usersFollowersFile!.Count}, previous following count: {usersFollowingFile!.Count}");
                 Console.WriteLine($"Current follower count:  {userFollowerCount}, current following count:  {userFollowingCount}\n");
 
+                Dictionary<string, string>? usersFollowing;
+                Dictionary<string, string>? usersFollowers;
+
                 Console.WriteLine("Getting Following...");
-                usersFollowing = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "following");
+                usersFollowing = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "following");
 
                 if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 3)//Sometimes a few followings are not fetched
                 {
@@ -122,7 +118,7 @@ namespace Stalkiana_Console
                 }
 
                 Console.WriteLine("Getting Followers...");
-                usersFollowers = InstagramAPI.getFollowingOrFollowerList(userPK, cookie, minTime, maxTime, countUsers, "followers");
+                usersFollowers = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "followers");
 
                 if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 3)//Sometimes a few followers are not fetched
                 {
@@ -170,7 +166,7 @@ namespace Stalkiana_Console
 
                 if (!hasNameChanges)
                 {
-                    resultLines.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm")}: There are no name changes");
+                    resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: There are no name changes");
                     Console.WriteLine("\nThere are no name changes");
                 }
 
@@ -228,17 +224,17 @@ namespace Stalkiana_Console
             {
                 cookie = UserInterface.getCookie(configFile);
                 csrftoken = Helper.getCsrftoken(cookie);
-                userPK = InstagramAPI.getUserID(username);
+                userID = InstagramAPI.getUserID(username);
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
-                if (userPK == null)
+                if (userID == null)
                 {
-                    Console.Error.WriteLine("Something went wrong while getting user PK");
+                    Console.Error.WriteLine("Something went wrong while getting user ID");
                     return;
                 }
 
-                storiesList = InstagramAPI.getStoriesList(cookie, csrftoken, userPK);
+                storiesList = InstagramAPI.getStoriesList(cookie, csrftoken, userID);
 
                 if (storiesList == null || storiesList!.Count == 0)
                 {
@@ -272,9 +268,9 @@ namespace Stalkiana_Console
             else if (option == "6")
             {
                 Console.WriteLine("Getting user ID...\n");
-                userPK = InstagramAPI.getUserID(username);
+                userID = InstagramAPI.getUserID(username);
 
-                Console.WriteLine($"\n{username} has the ID: {userPK}\n");
+                Console.WriteLine($"\n{username} has the ID: {userID}\n");
             }
 
             else if (option == "7")
