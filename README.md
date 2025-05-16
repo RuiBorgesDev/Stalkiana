@@ -52,7 +52,7 @@ A simple command-line tool for stalking an instagram account.
 
     **Linux:**
     ```shell
-    sh ./build-linux-x64.sh
+    bash ./build-linux-x64.sh
     ```
 
 4. Run the tool:
