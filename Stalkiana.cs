@@ -5,6 +5,7 @@ Do not use the tool multiple times per day or you might get flagged by Instagram
 */
 
 using System.Text.RegularExpressions;
+using YamlDotNet.RepresentationModel;
 
 namespace Stalkiana_Console
 {
@@ -12,6 +13,8 @@ namespace Stalkiana_Console
     {
         static void Main(string[] args)
         {
+            string userProfileDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string stalkianaBasePath = Path.Combine(userProfileDirectory, ".stalkiana");
             const int minTime = 100;
             const int maxTime = 250;
             string username;
@@ -21,32 +24,33 @@ namespace Stalkiana_Console
             const int countUsers = 64;
             const int countPost = 28;
             string? userID;
+            string configFileName = Path.Combine(stalkianaBasePath, "cookie");
 
-            int userFollowerCount;
-            int userFollowingCount;
-
-            string configFile = "cookie";
+            Directory.CreateDirectory(stalkianaBasePath);
 
             UserInterface.displayStartingScreen();
+            option = UserInterface.getOption();
 
             if (args.Length == 1)
             {
                 username = args[0];
             }
-            else
+            else if (option == "1" || option == "2" || option == "3" || option == "4" || option == "5" || option == "6")
             {
                 username = UserInterface.getUsername();
             }
+            else
+            {
+                username = "";
+            }
 
-            option = UserInterface.getOption();
-
-            string followingFileName = $"{username}/{username}_followings.json";
-            string followersFileName = $"{username}/{username}_followers.json";
-            string resultFileName = $"{username}/result.txt";
+            string userSpecificBasePath = Path.Combine(stalkianaBasePath, username);
+            string resultFilePath = Path.Combine(userSpecificBasePath, "result.txt");
+            Directory.CreateDirectory(userSpecificBasePath);
 
             if (option == "1")
             {
-                cookie = UserInterface.getCookie(configFile);
+                cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
                 userID = InstagramAPI.getUserID(username);
 
@@ -56,16 +60,20 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                Directory.CreateDirectory(username);
-                string? profileImagePath = Helper.CreateNewFile($"{username}/{username}_profileImage.jpg", Helper.getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userID, csrftoken)!)!);
-                Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in ./{profileImagePath}")}");
+                string profileImageFileName = $"{username}_profileImage.jpg";
+                string profileImageFullPath = Path.Combine(userSpecificBasePath, profileImageFileName);
+                string? profileImagePath = Helper.CreateNewFile(profileImageFullPath, Helper.getPostBytesFromUrl(InstagramAPI.getProfileImageUrl(userID, csrftoken)!)!);
+                Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in {profileImageFullPath}")}");
             }
 
             else if (option == "2")
             {
-                cookie = UserInterface.getCookie(configFile);
+                cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
                 userID = InstagramAPI.getUserID(username);
+
+                string followingFilePath = Path.Combine(userSpecificBasePath, $"{username}_followings.json");
+                string followersFilePath = Path.Combine(userSpecificBasePath, $"{username}_followers.json");
 
                 if (userID == null)
                 {
@@ -77,6 +85,8 @@ namespace Stalkiana_Console
 
                 var usersFollowingFile = new Dictionary<string, string>();
                 var usersFollowersFile = new Dictionary<string, string>();
+                int userFollowerCount;
+                int userFollowingCount;
                 var resultLines = new List<string>();
 
                 (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userID, cookie, csrftoken);
@@ -87,10 +97,10 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                if (File.Exists(followingFileName) && File.Exists(followersFileName))
+                if (File.Exists(followingFilePath) && File.Exists(followersFilePath))
                 {
-                    usersFollowingFile = Helper.getDataFromFile(followingFileName);
-                    usersFollowersFile = Helper.getDataFromFile(followersFileName);
+                    usersFollowingFile = Helper.getDataFromFile(followingFilePath);
+                    usersFollowersFile = Helper.getDataFromFile(followersFilePath);
                 }
 
                 if (usersFollowingFile == null || usersFollowersFile == null)
@@ -123,10 +133,8 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                Directory.CreateDirectory(username);
-
-                File.WriteAllText(followersFileName, Helper.dictionaryToJsonString(usersFollowers));
-                File.WriteAllText(followingFileName, Helper.dictionaryToJsonString(usersFollowing));
+                File.WriteAllText(followersFilePath, Helper.dictionaryToJsonString(usersFollowers));
+                File.WriteAllText(followingFilePath, Helper.dictionaryToJsonString(usersFollowing));
 
                 resultLines.Add($"\n{DateTime.Now:yyyy/MM/dd HH:mm}: Current Follower count: {userFollowerCount}, Current Following count: {userFollowingCount}");
                 resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
@@ -167,14 +175,14 @@ namespace Stalkiana_Console
                     Console.WriteLine("\nThere are no name changes");
                 }
 
-                File.AppendAllLines(resultFileName, resultLines);
-                Console.WriteLine($"\nFinished successfully, results saved in ./{username}/results.txt");
+                File.AppendAllLines(resultFilePath, resultLines);
+                Console.WriteLine($"\nFinished successfully, results saved in {resultFilePath}");
             }
             else if (option == "3")
             {
-                if (File.Exists($"{username}/result.txt"))
+                if (File.Exists(resultFilePath))
                 {
-                    Console.WriteLine(File.ReadAllText($"{username}/result.txt"));
+                    Console.WriteLine(File.ReadAllText(resultFilePath));
                 }
                 else
                 {
@@ -183,7 +191,7 @@ namespace Stalkiana_Console
             }
             else if (option == "4")
             {
-                cookie = UserInterface.getCookie(configFile);
+                cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
@@ -205,8 +213,10 @@ namespace Stalkiana_Console
                     postInfo += post.Key + ": " + post.Value + "\n";
                 }
 
-                Directory.CreateDirectory($"{username}/posts");
-                File.WriteAllText($"{username}/posts.txt", postInfo);
+                string postsDirectory = Path.Combine(userSpecificBasePath, "posts");
+                Directory.CreateDirectory(postsDirectory);
+                string postsTxtFile = Path.Combine(userSpecificBasePath, "posts.txt");
+                File.WriteAllText(postsTxtFile, postInfo);
                 Console.WriteLine("\nDownloading posts...\n");
 
                 string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
@@ -214,14 +224,16 @@ namespace Stalkiana_Console
                 {
                     byte[] postBytes = Helper.getPostBytesFromUrl(post.Value)!;
                     Match match = Regex.Match(post.Value, fileExtPattern);
-                    Helper.CreateNewFile($"{username}/posts/{post.Key}{match.Value}", postBytes);
+                    string postFileName = post.Key + match.Value;
+                    string postFilePath = Path.Combine(postsDirectory, postFileName);
+                    Helper.CreateNewFile(postFilePath, postBytes);
                 }
 
-                Console.WriteLine($"Post of {username} saved in ./{username}/posts/ and the URLs were saved in ./{username}/posts.txt");
+                Console.WriteLine($"Post of {username} saved in {postsDirectory} and the URLs were saved in {postsTxtFile}");
             }
             else if (option == "5")
             {
-                cookie = UserInterface.getCookie(configFile);
+                cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
                 userID = InstagramAPI.getUserID(username);
 
@@ -250,8 +262,10 @@ namespace Stalkiana_Console
                     storiesInfo += story.Key + ": " + story.Value + "\n";
                 }
 
-                Directory.CreateDirectory($"{username}/stories");
-                File.AppendAllText($"{username}/stories.txt", storiesInfo);
+                string storiesDirectory = Path.Combine(userSpecificBasePath, "stories");
+                Directory.CreateDirectory(storiesDirectory);
+                string storiesTxtFile = Path.Combine(userSpecificBasePath, "stories.txt");
+                File.AppendAllText(storiesTxtFile, storiesInfo);
 
                 Console.WriteLine("\nDownloading stories...\n");
 
@@ -260,10 +274,12 @@ namespace Stalkiana_Console
                 {
                     byte[] storyBytes = Helper.getPostBytesFromUrl(story.Value)!;
                     Match match = Regex.Match(story.Value, fileExtPattern);
-                    Helper.CreateNewFile($"{username}/stories/{story.Key}{match.Value}", storyBytes);
+                    string storyFileName = story.Key + match.Value;
+                    string storyFilePath = Path.Combine(storiesDirectory, storyFileName);
+                    Helper.CreateNewFile(storyFilePath, storyBytes);
                 }
 
-                Console.WriteLine($"Stories of {username} saved in ./{username}/stories/ and the URLs were saved in ./{username}/stories.txt");
+                Console.WriteLine($"Stories of {username} saved in {storiesDirectory} and the URLs were saved in {storiesTxtFile}");
             }
 
             else if (option == "6")
@@ -285,10 +301,28 @@ namespace Stalkiana_Console
                 cookie = UserInterface.getCookieInput();
                 try
                 {
-                    string cookieContent = $"cookie: '{cookie.Trim()}'";
+                    string configFilePath = Path.Combine(stalkianaBasePath, configFileName + ".yaml");
+                    var yaml = new YamlStream();
+                    if (File.Exists(configFilePath))
+                    {
+                        using (var reader = new StreamReader(configFilePath))
+                        {
+                            yaml.Load(reader);
+                        }
+                    }
+                    else
+                    {
+                        yaml.Documents.Add(new YamlDocument(new YamlMappingNode()));
+                    }
 
-                    File.WriteAllText(configFile + ".yaml", cookieContent);
-                    Console.WriteLine($"\nCookie successfully saved to: {configFile + ".yaml"}");
+                    var rootNode = (YamlMappingNode)yaml.Documents[0].RootNode;
+                    rootNode.Children[new YamlScalarNode("cookie")] = new YamlScalarNode(cookie.Trim());
+                    using (var writer = new StreamWriter(configFilePath))
+                    {
+                        yaml.Save(writer, assignAnchors: false);
+                    }
+
+                    Console.WriteLine($"\nCookie successfully saved to: {configFilePath}");
                 }
                 catch (Exception ex)
                 {
@@ -297,8 +331,7 @@ namespace Stalkiana_Console
             }
             else if (option == "8")
             {
-                string path = Path.Combine(Directory.GetCurrentDirectory(), username);
-                Helper.OpenFolder(path);
+                Helper.OpenFolder(userSpecificBasePath);
             }
             return;
         }

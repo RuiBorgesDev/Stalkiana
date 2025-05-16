@@ -71,24 +71,24 @@ namespace Stalkiana_Console
             return cookie;
         }
 
-        public static string getCookie(string configFile)
+        public static string getCookie(string configFilePath)
         {
-            if (File.Exists(configFile + ".txt"))
+            if (File.Exists(configFilePath + ".txt"))
             {
                 try
                 {
-                    return File.ReadAllText(configFile + ".txt").Replace("\n", "");
+                    return File.ReadAllText(configFilePath + ".txt").Replace("\n", "");
                 }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine("Error reading TXT config: " + ex.Message + "\nFallback to manual credentials.");
                 }
             }
-            else if (File.Exists(configFile + ".yaml") || File.Exists(configFile + ".yml"))
+            else if (File.Exists(configFilePath + ".yaml") || File.Exists(configFilePath + ".yml"))
             {
                 try
                 {
-                    string yamlFileFullPath = File.Exists(configFile + ".yaml") ? configFile + ".yaml" : configFile + ".yml";
+                    string yamlFileFullPath = File.Exists(configFilePath + ".yaml") ? configFilePath + ".yaml" : configFilePath + ".yml";
                     string yamlContent = File.ReadAllText(yamlFileFullPath);
 
                     var deserializer = new DeserializerBuilder().Build();

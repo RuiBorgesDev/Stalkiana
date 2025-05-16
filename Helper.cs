@@ -12,13 +12,12 @@ namespace Stalkiana_Console
         public static List<string> compareLists(Dictionary<string, string> userList1, Dictionary<string, string> userList2, string username, string compareType)
         {
             var lines = new List<string>();
+            string content = "";
 
             foreach (var user in userList1)
             {
                 if (!userList2.ContainsKey(user.Key))
                 {
-                    string content = "";
-
                     switch (compareType)
                     {
                         case "following":
@@ -39,8 +38,6 @@ namespace Stalkiana_Console
             {
                 if (!userList1.ContainsKey(user.Key))
                 {
-                    string content = "";
-
                     switch (compareType)
                     {
                         case "following":
@@ -60,9 +57,9 @@ namespace Stalkiana_Console
             return lines;
         }
 
-        public static Dictionary<string, string>? getDataFromFile(string filename)
+        public static Dictionary<string, string>? getDataFromFile(string filePath)
         {
-            string jsonString = File.ReadAllText(filename);
+            string jsonString = File.ReadAllText(filePath);
 
             try
             {
