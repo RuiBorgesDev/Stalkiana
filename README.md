@@ -70,7 +70,7 @@ This tool has three main functions:
 
 2- Downloading all media/posts/stories (this works in both public and private instagram accounts).
 
-3- Tracking followers/followings by keeping a local list of the followers/followings of an instagram user and then upon execution check if the follower/following count has changed compared to the last execution time, if it changed it determines the difference by comparing the new list with the old list, when the tool finishes execution, it logs the results into a results.txt file.
+3- Tracking followers/followings by keeping a local list of the followers/followings of an instagram user and then upon execution check if the follower/following count has changed compared to the last execution time, if it changed it determines the difference by comparing the new list with the old list, when the tool finishes execution, it logs the results into a result.txt file.
 
 This tool requires the instagram cookie in order to work.
 If you don't know how to get the cookie, here are the steps to get it:
