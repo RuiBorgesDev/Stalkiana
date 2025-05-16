@@ -25,7 +25,7 @@ A simple command-line tool for stalking an instagram account.
 
 ## Prerequisites
 
-- .NET SDK 8.0 installed on your machine;
+- .NET SDK 8.0 or higher installed on your machine (you can donwload and install it from [here](https://dotnet.microsoft.com/en-us/download/dotnet));
 - Instagram cookies;
 
 ## Installation
@@ -42,10 +42,23 @@ A simple command-line tool for stalking an instagram account.
     cd Stalkiana
     ```
 
-3. Run the tool:
+3. Build the tool:
+
+    **Windows:**
+    ```powershell
+    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+    ./build-win-x64.ps1
+    ```
+
+    **Linux:**
+    ```shell
+    sh ./build-linux-x64.sh
+    ```
+
+4. Run the tool:
 
     ```shell
-    dotnet run [username]
+    Stalkiana [username]
     ```
     [username] (optional): The Instagram username to track. If not provided, the program will prompt you to enter the username during execution.
 
