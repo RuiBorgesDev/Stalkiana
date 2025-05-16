@@ -178,6 +178,7 @@ namespace Stalkiana_Console
                 File.AppendAllLines(resultFilePath, resultLines);
                 Console.WriteLine($"\nFinished successfully, results saved in {resultFilePath}");
             }
+
             else if (option == "3")
             {
                 if (File.Exists(resultFilePath))
@@ -186,9 +187,10 @@ namespace Stalkiana_Console
                 }
                 else
                 {
-                    Console.WriteLine($"\nThe local history for {username} does not exist, please use the Get Followers/Following on {username} first to create the history.");
+                    Console.WriteLine($"\nThe local history for {username} does not exist, please use the Get Followers/Following on {username} first to create the history");
                 }
             }
+
             else if (option == "4")
             {
                 cookie = UserInterface.getCookie(configFileName);
@@ -231,6 +233,7 @@ namespace Stalkiana_Console
 
                 Console.WriteLine($"Post of {username} saved in {postsDirectory} and the URLs were saved in {postsTxtFile}");
             }
+
             else if (option == "5")
             {
                 cookie = UserInterface.getCookie(configFileName);
@@ -329,10 +332,37 @@ namespace Stalkiana_Console
                     Console.Error.WriteLine($"\nAn error occurred while saving the cookie: {ex.Message}");
                 }
             }
+
             else if (option == "8")
+            {
+                Console.WriteLine("\nListing all users with stored data:\n");
+                try
+                {
+                    var userDirectories = Directory.GetDirectories(stalkianaBasePath);
+                    if (userDirectories.Length == 0)
+                    {
+                        Console.WriteLine("No user data found in .stalkiana");
+                    }
+                    else
+                    {
+                        foreach (var dirPath in userDirectories)
+                        {
+                            Console.WriteLine($"- {Path.GetFileName(dirPath)}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error listing users: {ex.Message}");
+                }
+                Console.WriteLine();
+            }
+
+            else if (option == "9")
             {
                 Helper.OpenFolder(userSpecificBasePath);
             }
+
             return;
         }
     }

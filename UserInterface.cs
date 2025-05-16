@@ -7,7 +7,6 @@ namespace Stalkiana_Console
         public static void displayStartingScreen()
         {
             Console.Clear();
-            Console.WriteLine("Welcome to Stalkiana the instagram stalking tool\n");
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(@"  _________  __           .__    __    .__                         
@@ -17,7 +16,6 @@ namespace Stalkiana_Console
 /_______  / |__|  (____  /|____/|__|_ \|__|(____  /|___|  /(____  /
         \/             \/            \/         \/      \/      \/ ");
             Console.ResetColor();
-            Console.Write("\nThis is a tool used for stalking an Instagram user\n");
         }
         public static string getUsername()
         {
@@ -36,6 +34,8 @@ namespace Stalkiana_Console
         public static string getOption()
         {
             string option;
+            string[] validOptions = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
             do
             {
                 Console.WriteLine("\n1- Download Profile Picture ");
@@ -45,14 +45,15 @@ namespace Stalkiana_Console
                 Console.WriteLine("5- Download Stories");
                 Console.WriteLine("6- Get User ID");
                 Console.WriteLine("7- Save Cookie");
-                Console.WriteLine("8- Open Folder\n");
+                Console.WriteLine("8- List All Users");
+                Console.WriteLine("9- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
                 option = Console.ReadLine()!;
                 if (string.IsNullOrWhiteSpace(option))
                 {
                     Console.WriteLine("Option cannot be empty. Please enter a valid option");
                 }
-            } while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6" && option != "7" && option != "8");
+            } while (!validOptions.Contains(option));
             return option;
         }
 
