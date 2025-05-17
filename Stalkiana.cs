@@ -18,11 +18,11 @@ namespace Stalkiana_Console
             const int minTime = 100;
             const int maxTime = 250;
             string username;
-            string option;
+            int option;
             string cookie;
             string csrftoken;
             const int countUsers = 64;
-            const int countPost = 28;
+            const int countPosts = 28;
             string? userID;
             string configFileName = Path.Combine(stalkianaBasePath, "cookie");
 
@@ -35,20 +35,20 @@ namespace Stalkiana_Console
             {
                 username = args[0];
             }
-            else if (option == "1" || option == "2" || option == "3" || option == "4" || option == "5" || option == "6")
+            else if (option < 7)
             {
                 username = UserInterface.getUsername();
             }
             else
             {
-                username = "";
+                username = string.Empty;
             }
 
             string userSpecificBasePath = Path.Combine(stalkianaBasePath, username);
             string resultFilePath = Path.Combine(userSpecificBasePath, "result.txt");
             Directory.CreateDirectory(userSpecificBasePath);
 
-            if (option == "1")
+            if (option == 1)
             {
                 cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
@@ -66,7 +66,7 @@ namespace Stalkiana_Console
                 Console.WriteLine($"{(profileImagePath == null ? "\nThe profile picture is unchanged. No new file created" : $"\nThe profile picture was successfully saved in {profileImageFullPath}")}");
             }
 
-            else if (option == "2")
+            else if (option == 2)
             {
                 cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
@@ -85,11 +85,9 @@ namespace Stalkiana_Console
 
                 var usersFollowingFile = new Dictionary<string, string>();
                 var usersFollowersFile = new Dictionary<string, string>();
-                int userFollowerCount;
-                int userFollowingCount;
                 var resultLines = new List<string>();
 
-                (userFollowingCount, userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userID, cookie, csrftoken);
+                (int userFollowingCount, int userFollowerCount) = InstagramAPI.getFollowingAndFollowerCount(userID, cookie, csrftoken);
 
                 if (userFollowerCount < 1 || userFollowingCount < 1)
                 {
@@ -148,6 +146,7 @@ namespace Stalkiana_Console
                 resultLines.AddRange(Helper.compareLists(usersFollowingFile, usersFollowing, username, "following"));
 
                 bool hasNameChanges = false;
+                Console.WriteLine();
 
                 foreach (var user in usersFollowersFile)
                 {
@@ -172,14 +171,14 @@ namespace Stalkiana_Console
                 if (!hasNameChanges)
                 {
                     resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: There are no name changes");
-                    Console.WriteLine("\nThere are no name changes");
+                    Console.WriteLine("There are no name changes");
                 }
 
                 File.AppendAllLines(resultFilePath, resultLines);
                 Console.WriteLine($"\nFinished successfully, results saved in {resultFilePath}");
             }
 
-            else if (option == "3")
+            else if (option == 3)
             {
                 if (File.Exists(resultFilePath))
                 {
@@ -191,16 +190,14 @@ namespace Stalkiana_Console
                 }
             }
 
-            else if (option == "4")
+            else if (option == 4)
             {
                 cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
 
                 Console.WriteLine("\nThis only works on public instagram accounts or on private accounts that you are following\n");
 
-                Dictionary<string, string>? postList;
-
-                postList = InstagramAPI.getPostList(cookie, csrftoken, minTime, maxTime, countPost, username);
+                Dictionary<string, string>? postList = InstagramAPI.getPostList(cookie, csrftoken, minTime, maxTime, countPosts, username);
 
                 if (postList == null || postList!.Count == 0)
                 {
@@ -208,7 +205,7 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                string postInfo = "";
+                string postInfo = string.Empty;
 
                 foreach (var post in postList)
                 {
@@ -234,7 +231,7 @@ namespace Stalkiana_Console
                 Console.WriteLine($"Post of {username} saved in {postsDirectory} and the URLs were saved in {postsTxtFile}");
             }
 
-            else if (option == "5")
+            else if (option == 5)
             {
                 cookie = UserInterface.getCookie(configFileName);
                 csrftoken = Helper.getCsrftoken(cookie);
@@ -258,7 +255,7 @@ namespace Stalkiana_Console
                     return;
                 }
 
-                string storiesInfo = "";
+                string storiesInfo = string.Empty;
 
                 foreach (var story in storiesList)
                 {
@@ -270,7 +267,7 @@ namespace Stalkiana_Console
                 string storiesTxtFile = Path.Combine(userSpecificBasePath, "stories.txt");
                 File.AppendAllText(storiesTxtFile, storiesInfo);
 
-                Console.WriteLine("\nDownloading stories...\n");
+                Console.WriteLine("Downloading stories...\n");
 
                 string fileExtPattern = @"\.[a-zA-Z0-9]{2,5}(?=\?)";
                 foreach (var story in storiesList)
@@ -285,7 +282,7 @@ namespace Stalkiana_Console
                 Console.WriteLine($"Stories of {username} saved in {storiesDirectory} and the URLs were saved in {storiesTxtFile}");
             }
 
-            else if (option == "6")
+            else if (option == 6)
             {
                 Console.WriteLine("Getting user ID...\n");
                 userID = InstagramAPI.getUserID(username);
@@ -299,7 +296,7 @@ namespace Stalkiana_Console
                 Console.WriteLine($"\n{username} has the ID: {userID}\n");
             }
 
-            else if (option == "7")
+            else if (option == 7)
             {
                 cookie = UserInterface.getCookieInput();
                 try
@@ -333,7 +330,7 @@ namespace Stalkiana_Console
                 }
             }
 
-            else if (option == "8")
+            else if (option == 8)
             {
                 Console.WriteLine("\nListing all users with stored data:\n");
                 try
@@ -358,7 +355,7 @@ namespace Stalkiana_Console
                 Console.WriteLine();
             }
 
-            else if (option == "9")
+            else if (option == 9)
             {
                 Helper.OpenFolder(userSpecificBasePath);
             }

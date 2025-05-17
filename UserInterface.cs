@@ -31,10 +31,10 @@ namespace Stalkiana_Console
             } while (string.IsNullOrWhiteSpace(username));
             return username;
         }
-        public static string getOption()
+        public static int getOption()
         {
-            string option;
-            string[] validOptions = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+            int option;
+            string? input;
 
             do
             {
@@ -48,12 +48,13 @@ namespace Stalkiana_Console
                 Console.WriteLine("8- List All Users");
                 Console.WriteLine("9- Open Folder\n");
                 Console.Write("Choose what you want to do: ");
-                option = Console.ReadLine()!;
-                if (string.IsNullOrWhiteSpace(option))
+                input = Console.ReadLine();
+                if (!int.TryParse(input, out option) || option > 9 || option <= 0)
                 {
-                    Console.WriteLine("Option cannot be empty. Please enter a valid option");
+                    Console.Clear();
+                    Console.WriteLine("Please enter a valid option");
                 }
-            } while (!validOptions.Contains(option));
+            } while (option > 9 || option <= 0);
             return option;
         }
 
