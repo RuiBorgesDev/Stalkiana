@@ -44,6 +44,8 @@ A simple command-line tool for stalking an instagram account.
 
 3. Build the tool:
 
+    Building the tool might take a few minutes to run.
+
     **Windows (PowerShell):**
     ```powershell
     Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
