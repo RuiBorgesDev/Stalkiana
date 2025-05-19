@@ -138,13 +138,13 @@ namespace Stalkiana_Console
                 resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
                 Console.WriteLine($"\n{username} {(usersFollowing.Count < usersFollowingFile.Count ? "stopped" : "started")} following {(usersFollowing.Count < usersFollowingFile.Count ? usersFollowingFile.Count - usersFollowing.Count : usersFollowing.Count - usersFollowingFile.Count)} users");
 
-                resultLines.AddRange(Helper.compareLists(usersFollowersFile, usersFollowers, username, "followers"));
+                resultLines.AddRange(Helper.compareLists(usersFollowingFile, usersFollowing, username, "following"));
 
                 resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
                 Console.WriteLine($"\n{(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
 
-                resultLines.AddRange(Helper.compareLists(usersFollowingFile, usersFollowing, username, "following"));
-
+                resultLines.AddRange(Helper.compareLists(usersFollowersFile, usersFollowers, username, "followers"));
+                
                 bool hasNameChanges = false;
                 Console.WriteLine();
 
