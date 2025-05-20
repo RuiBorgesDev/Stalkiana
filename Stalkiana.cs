@@ -144,27 +144,20 @@ namespace Stalkiana_Console
                 Console.WriteLine($"\n{(usersFollowers.Count < usersFollowersFile.Count ? usersFollowersFile.Count - usersFollowers.Count : usersFollowers.Count - usersFollowersFile.Count)} users {(usersFollowers.Count < usersFollowersFile.Count ? "stopped" : "started")} following {username}");
 
                 resultLines.AddRange(Helper.compareLists(usersFollowersFile, usersFollowers, username, "followers"));
-                
+
                 bool hasNameChanges = false;
                 Console.WriteLine();
 
-                foreach (var user in usersFollowersFile)
-                {
-                    if (usersFollowers.ContainsKey(user.Key) && usersFollowers[user.Key] != usersFollowersFile[user.Key])
-                    {
-                        hasNameChanges = true;
-                        resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {user.Value} changed their username to {usersFollowers[user.Key]}");
-                        Console.WriteLine($"{user.Value} changed their username to {usersFollowers[user.Key]}");
-                    }
-                }
+                var allUsersFile = usersFollowersFile.Concat(usersFollowingFile).GroupBy(kvp => kvp.Key).ToDictionary(g => g.Key, g => g.Last().Value);
+                var allUsers = usersFollowers.Concat(usersFollowing).GroupBy(kvp => kvp.Key).ToDictionary(g => g.Key, g => g.Last().Value);
 
-                foreach (var user in usersFollowingFile)
+                foreach (var user in allUsersFile)
                 {
-                    if (usersFollowing.ContainsKey(user.Key) && usersFollowing[user.Key] != usersFollowingFile[user.Key])
+                    if (allUsers.ContainsKey(user.Key) && allUsers[user.Key] != allUsersFile[user.Key])
                     {
                         hasNameChanges = true;
-                        resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {user.Value} changed their username to {usersFollowing[user.Key]}");
-                        Console.WriteLine($"{user.Value} changed their username to {usersFollowing[user.Key]}");
+                        resultLines.Add($"{DateTime.Now:yyyy/MM/dd HH:mm}: {user.Value} changed their username to {allUsers[user.Key]}");
+                        Console.WriteLine($"{user.Value} changed their username to {allUsers[user.Key]}");
                     }
                 }
 
@@ -352,7 +345,6 @@ namespace Stalkiana_Console
                 {
                     Console.Error.WriteLine($"Error listing users: {ex.Message}");
                 }
-                Console.WriteLine();
             }
 
             else if (option == 9)
