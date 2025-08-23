@@ -7,7 +7,7 @@
         \/             \/            \/         \/      \/      \/ 
 </pre>
 
-A simple command-line tool for stalking an instagram account.
+A simple command-line tool for stalking instagram accounts.
 
 **Note**: Please be aware that using this tool is against Instagram's terms of service. Use it responsibly and at your own risk.
 
