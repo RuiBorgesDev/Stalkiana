@@ -25,7 +25,7 @@ A simple command-line tool for stalking instagram accounts.
 
 ## Prerequisites
 
-- .NET SDK 8.0 or higher installed on your machine (you can donwload and install it from [here](https://dotnet.microsoft.com/en-us/download/dotnet));
+- .NET SDK 8.0 or higher installed on your machine (you can download and install it from [here](https://dotnet.microsoft.com/en-us/download/dotnet));
 - Instagram cookies;
 
 ## Installation
