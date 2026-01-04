@@ -39,13 +39,12 @@ $dotnetArgs = @(
     "-p:PublishDir=$stalkianaBasePath"
 )
 
-$exitCode = -1 
+$exitCode = -1
 
 try {
     Write-Host "Running: dotnet $($dotnetArgs -join ' ')"
-
-    $process = Start-Process dotnet -ArgumentList ($dotnetArgs -join ' ') -Wait -PassThru -NoNewWindow
-    $exitCode = $process.ExitCode
+    & dotnet $dotnetArgs
+    $exitCode = $LASTEXITCODE
 }
 catch {
 
@@ -87,7 +86,7 @@ if ($exitCode -eq 0) {
             Write-Host "Successfully added '$absoluteOutputDir' to the permanent $scope PATH." -ForegroundColor Green
             Write-Host "IMPORTANT: You MUST restart PowerShell (or log out and log back in) for this change to take full effect in new sessions." -ForegroundColor Yellow
             Write-Host "For the current session, you can update the PATH by running:" -ForegroundColor Yellow
-            Write-Host "  `$env:Path = '$newPath'" -ForegroundColor Yellow
+            Write-Host "  `$env:Path += ';$newPath'" -ForegroundColor Yellow
         }
         else {
             Write-Host "'$absoluteOutputDir' is already present in the $scope PATH. No changes made." -ForegroundColor Cyan
