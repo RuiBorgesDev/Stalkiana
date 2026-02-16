@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DebugType>none</DebugType>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
