@@ -116,18 +116,24 @@ namespace Stalkiana_Console
                 Console.WriteLine("Getting Following...");
                 usersFollowing = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "following");
 
-                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) >= 3)//Sometimes a few followings are not fetched
+                int followingThreshold = (int)Math.Max(2, userFollowingCount * 0.01);
+
+                if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) > followingThreshold)
                 {
-                    Console.Error.WriteLine($"Something went wrong while fetching following: {usersFollowing}");
+                    Console.Error.WriteLine($"Error: Fetching following failed or count mismatch too high.");
+                    Console.Error.WriteLine($"Expected: {userFollowingCount}, Fetched: {usersFollowing?.Count ?? 0}, Allowed Diff: {followingThreshold}");
                     return;
                 }
 
                 Console.WriteLine("Getting Followers...");
                 usersFollowers = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "followers");
 
-                if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) >= 3)//Sometimes a few followers are not fetched
+                int followerThreshold = (int)Math.Max(2, userFollowerCount * 0.01);
+
+                if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) > followerThreshold)
                 {
-                    Console.Error.WriteLine($"Something went wrong while fetching followers: {usersFollowers}");
+                    Console.Error.WriteLine($"Error: Fetching followers failed or count mismatch too high.");
+                    Console.Error.WriteLine($"Expected: {userFollowerCount}, Fetched: {usersFollowers?.Count ?? 0}, Allowed Diff: {followerThreshold}");
                     return;
                 }
 
