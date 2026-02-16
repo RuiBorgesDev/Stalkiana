@@ -1,5 +1,6 @@
 using RestSharp;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace Stalkiana_Console
 {
@@ -174,9 +175,8 @@ namespace Stalkiana_Console
         public static string? getUserID(string username)
         {
             string userPK;
-            var request = new RestRequest("api/v1/users/web_profile_info/", Method.Get);
-            request.AddHeader("x-ig-app-id", "936619743392459");
-            request.AddQueryParameter("username", username);
+            var request = new RestRequest($"/{username}", Method.Get);
+
             var response = client.Execute(request);
 
             if (!response.IsSuccessful)
@@ -186,8 +186,9 @@ namespace Stalkiana_Console
             }
             try
             {
-                dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-                userPK = obj.data.user.id;
+                Match match = Regex.Match(response.Content!, @"profile_id\D*(\d+)");
+                string result = match.Groups[1].Value;
+                userPK = result;
                 return userPK;
             }
             catch (Exception e)
