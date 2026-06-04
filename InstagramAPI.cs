@@ -227,9 +227,9 @@ namespace Stalkiana_Console
 
         public static string? getProfileImageUrl(string userPK, string csrftoken)
         {
-            var request = new RestRequest("/graphql/query/", Method.Post);
+            var request = new RestRequest("/api/graphql/", Method.Post);
             request.AddHeader("x-csrftoken", csrftoken);
-            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=9718997071514355", "application/x-www-form-urlencoded");
+            request.AddBody($"variables=%7B%22id%22%3A%22{userPK}%22%2C%22render_surface%22%3A%22PROFILE%22%7D&doc_id=26672929172408668", "application/x-www-form-urlencoded");
             var response = client.Execute(request);
 
             if (!response.IsSuccessful)
