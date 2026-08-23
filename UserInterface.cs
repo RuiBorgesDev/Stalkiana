@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Stalkiana_Console
 {
-    // A data model for managing our cookies
     public class CookieConfig
     {
         public string ActiveCookie { get; set; } = string.Empty;
@@ -30,7 +29,7 @@ namespace Stalkiana_Console
             string username;
             do
             {
-                Console.Write("\nPlease input the username to stalk: ");
+                Console.Write("\nPlease input the username to target: ");
                 username = Console.ReadLine()!;
                 if (string.IsNullOrWhiteSpace(username))
                 {
@@ -40,31 +39,82 @@ namespace Stalkiana_Console
             return username;
         }
 
-        public static int getOption()
+        public static int getOption(ref string username)
         {
             int option;
             string? input;
 
-            do
+            while (true)
             {
-                Console.WriteLine("\n1- Download Profile Picture ");
-                Console.WriteLine("2- Get Followers/Following");
-                Console.WriteLine("3- Show Local History");
-                Console.WriteLine("4- Download Posts");
-                Console.WriteLine("5- Download Stories");
-                Console.WriteLine("6- Get User ID");
-                Console.WriteLine("7- Manage Cookies"); // Changed title
-                Console.WriteLine("8- List All Users");
-                Console.WriteLine("9- Open Folder\n");
-                Console.Write("Choose what you want to do: ");
-                input = Console.ReadLine();
-                if (!int.TryParse(input, out option) || option > 9 || option <= 0)
+                Console.WriteLine();
+                
+                if (string.IsNullOrEmpty(username))
                 {
-                    Console.Clear();
-                    Console.WriteLine("Please enter a valid option");
+                    Console.WriteLine("1- Set Target Username");
+                    Console.WriteLine("2- Manage Cookies");
+                    Console.WriteLine("3- List All Users");
+                    Console.WriteLine("4- Exit\n");
+                    Console.Write("Choose what you want to do: ");
+
+                    input = Console.ReadLine();
+                    
+                    if (input == "1")
+                    {
+                        username = getUsername();
+                        Console.Clear();
+                        displayStartingScreen();
+                        continue;
+                    }
+                    else if (input == "2") return 7;
+                    else if (input == "3") return 8;
+                    else if (input == "4") return 10;
+                    else
+                    {
+                        Console.Clear();
+                        displayStartingScreen();
+                        Console.WriteLine("\nPlease enter a valid option.");
+                    }
                 }
-            } while (option > 9 || option <= 0);
-            return option;
+
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"--- Current Target: {username} ---");
+                    Console.ResetColor();
+                    Console.WriteLine("1- Download Profile Picture ");
+                    Console.WriteLine("2- Get Followers/Following");
+                    Console.WriteLine("3- Show Local History");
+                    Console.WriteLine("4- Download Posts");
+                    Console.WriteLine("5- Download Stories");
+                    Console.WriteLine("6- Get User ID");
+                    Console.WriteLine("7- Manage Cookies");
+                    Console.WriteLine("8- List All Users");
+                    Console.WriteLine("9- Open Folder");
+                    Console.WriteLine("10- Change/Clear Target Username");
+                    Console.WriteLine("11- Exit\n");
+                    Console.Write("Choose what you want to do: ");
+                    
+                    input = Console.ReadLine();
+                    
+                    if (int.TryParse(input, out option) && option >= 1 && option <= 11)
+                    {
+                        if (option == 10) 
+                        {
+                            username = string.Empty;
+                            Console.Clear();
+                            displayStartingScreen();
+                            continue;
+                        }
+                        if (option == 11) return 10;
+                        
+                        return option;
+                    }
+
+                    Console.Clear();
+                    displayStartingScreen();
+                    Console.WriteLine("\nPlease enter a valid option.");
+                }
+            }
         }
 
         public static string getCookieInput()
@@ -81,8 +131,6 @@ namespace Stalkiana_Console
             } while (string.IsNullOrWhiteSpace(cookie));
             return cookie;
         }
-
-        // --- Cookie Management Methods ---
 
         private static CookieConfig LoadConfig(string path)
         {
@@ -109,24 +157,20 @@ namespace Stalkiana_Console
         {
             var config = LoadConfig(configFilePath);
             
-            // Check if we have an active cookie configured
             if (!string.IsNullOrEmpty(config.ActiveCookie) && config.Cookies.ContainsKey(config.ActiveCookie))
             {
                 return config.Cookies[config.ActiveCookie];
             }
 
-            // If not, force the user to set one up using the manager
             Console.WriteLine("\nNo active cookie found. Please configure a cookie first.");
             manageCookies(configFilePath);
 
-            // Try again after managing
             config = LoadConfig(configFilePath);
             if (!string.IsNullOrEmpty(config.ActiveCookie) && config.Cookies.ContainsKey(config.ActiveCookie))
             {
                 return config.Cookies[config.ActiveCookie];
             }
 
-            // Absolute fallback
             return getCookieInput();
         }
 
@@ -153,10 +197,7 @@ namespace Stalkiana_Console
 
                 string? choice = Console.ReadLine();
 
-                if (choice == "7")
-                {
-                    break; // Exit the loop and return
-                }
+                if (choice == "7") break; 
                 
                 Console.WriteLine();
 
@@ -191,7 +232,6 @@ namespace Stalkiana_Console
                             string newCookieStr = getCookieInput();
                             config.Cookies[addName] = newCookieStr;
 
-                            // If it's the first cookie, set it as active automatically
                             if (string.IsNullOrEmpty(config.ActiveCookie) || config.Cookies.Count == 1)
                             {
                                 config.ActiveCookie = addName;
@@ -227,7 +267,6 @@ namespace Stalkiana_Console
                         if (config.Cookies.ContainsKey(removeName))
                         {
                             config.Cookies.Remove(removeName);
-                            // If the active cookie was removed, fallback to another or none
                             if (config.ActiveCookie == removeName)
                             {
                                 config.ActiveCookie = config.Cookies.Keys.FirstOrDefault() ?? string.Empty;
