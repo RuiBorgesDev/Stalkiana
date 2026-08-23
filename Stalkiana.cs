@@ -1,11 +1,4 @@
-﻿/*
-
-Do not use the tool multiple times per day or you might get flagged by Instagram
-
-*/
-
-using System.Text.RegularExpressions;
-using YamlDotNet.RepresentationModel;
+﻿using System.Text.RegularExpressions;
 
 namespace Stalkiana_Console
 {
@@ -24,7 +17,9 @@ namespace Stalkiana_Console
             const int countUsers = 64;
             const int countPosts = 28;
             string? userID;
-            string configFileName = Path.Combine(stalkianaBasePath, "cookie");
+            
+            // Replaced the extensionless config file with a proper JSON config.
+            string configFileName = Path.Combine(stalkianaBasePath, "cookies.json");
 
             Directory.CreateDirectory(stalkianaBasePath);
 
@@ -46,7 +41,11 @@ namespace Stalkiana_Console
 
             string userSpecificBasePath = Path.Combine(stalkianaBasePath, username);
             string resultFilePath = Path.Combine(userSpecificBasePath, "result.txt");
-            Directory.CreateDirectory(userSpecificBasePath);
+            
+            if (!string.IsNullOrEmpty(username))
+            {
+                Directory.CreateDirectory(userSpecificBasePath);
+            }
 
             if (option == 1)
             {
@@ -297,36 +296,8 @@ namespace Stalkiana_Console
 
             else if (option == 7)
             {
-                cookie = UserInterface.getCookieInput();
-                try
-                {
-                    string configFilePath = Path.Combine(stalkianaBasePath, configFileName + ".yaml");
-                    var yaml = new YamlStream();
-                    if (File.Exists(configFilePath))
-                    {
-                        using (var reader = new StreamReader(configFilePath))
-                        {
-                            yaml.Load(reader);
-                        }
-                    }
-                    else
-                    {
-                        yaml.Documents.Add(new YamlDocument(new YamlMappingNode()));
-                    }
-
-                    var rootNode = (YamlMappingNode)yaml.Documents[0].RootNode;
-                    rootNode.Children[new YamlScalarNode("cookie")] = new YamlScalarNode(cookie.Trim());
-                    using (var writer = new StreamWriter(configFilePath))
-                    {
-                        yaml.Save(writer, assignAnchors: false);
-                    }
-
-                    Console.WriteLine($"\nCookie successfully saved to: {configFilePath}");
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"\nAn error occurred while saving the cookie: {ex.Message}");
-                }
+                // Calls the new Manage Cookies functionality
+                UserInterface.manageCookies(configFileName);
             }
 
             else if (option == 8)
