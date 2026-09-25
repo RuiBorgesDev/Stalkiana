@@ -8,10 +8,11 @@ namespace Stalkiana_Console
         {
             string userProfileDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string stalkianaBasePath = Path.Combine(userProfileDirectory, ".stalkiana");
-            const int minTime = 100;
-            const int maxTime = 250;
+            const int minTime = 10;
+            const int maxTime = 50;
             const int countUsers = 64;
             const int countPosts = 28;
+            const int totalPasses = 5;
             
             string configFileName = Path.Combine(stalkianaBasePath, "cookies.json");
             Directory.CreateDirectory(stalkianaBasePath);
@@ -100,9 +101,9 @@ namespace Stalkiana_Console
                             Console.WriteLine($"Current follower count:  {userFollowerCount}, current following count:  {userFollowingCount}\n");
 
                             Console.WriteLine("Getting Following...");
-                            var usersFollowing = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "following");
+                            var usersFollowing = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "following", totalPasses);
 
-                            int followingThreshold = (int)Math.Max(2, userFollowingCount * 0.01);
+                            int followingThreshold = (int)Math.Max(2, userFollowingCount * 0.016);
 
                             if (usersFollowing == null || Math.Abs(userFollowingCount - usersFollowing.Count) > followingThreshold)
                             {
@@ -112,9 +113,9 @@ namespace Stalkiana_Console
                             else
                             {
                                 Console.WriteLine("Getting Followers...");
-                                var usersFollowers = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "followers");
+                                var usersFollowers = InstagramAPI.getFollowingOrFollowerList(userID, cookie, minTime, maxTime, countUsers, "followers", totalPasses);
 
-                                int followerThreshold = (int)Math.Max(2, userFollowerCount * 0.01);
+                                int followerThreshold = (int)Math.Max(2, userFollowerCount * 0.016);
 
                                 if (usersFollowers == null || Math.Abs(userFollowerCount - usersFollowers.Count) > followerThreshold)
                                 {

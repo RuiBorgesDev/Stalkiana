@@ -1,6 +1,7 @@
 using RestSharp;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace Stalkiana_Console
 {
@@ -14,74 +15,71 @@ namespace Stalkiana_Console
             Thread.Sleep(rand.Next(minTime, maxTime));
         }
 
-        public static Dictionary<string, string>? getFollowingOrFollowerList(string userPK, string cookie, int minTime, int maxTime, int count, string type)
+        public static Dictionary<string, string>? getFollowingOrFollowerList(string userPK, string cookie, int minTime, int maxTime, int count, string type, int totalPasses = 4)
         {
             var list = new Dictionary<string, string>();
-            string queryHash;
-            if (type == "following")
-            {
-                queryHash = "d04b0a864b4b54837c0d870b0e77e076";
-            }
-            else if (type == "followers")
-            {
-                queryHash = "c76146de99bb02f6415203be841dd25a";
-            }
-            else
+
+            if (type != "followers" && type != "following")
             {
                 Console.WriteLine("Invalid request type.");
                 return null;
             }
 
-            bool hasNext = true;
-            string? after = null;
-
-            while (hasNext)
+            for (int pass = 1; pass <= totalPasses; pass++)
             {
-                var request = new RestRequest("/graphql/query/", Method.Get);
-                request.AddQueryParameter("query_hash", queryHash);
-                request.AddQueryParameter("id", userPK);
-                request.AddQueryParameter("include_reel", "true");
-                request.AddQueryParameter("fetch_mutual", "true");
-                request.AddQueryParameter("first", count.ToString());
-                request.AddQueryParameter("after", after);
-                request.AddHeader("cookie", cookie);
-                var response = client.Execute(request);
+                Console.WriteLine($"Starting {type} pass {pass}/{totalPasses}...");
 
-                if (!response.IsSuccessful)
+                bool hasMore = true;
+                string? after = null;
+
+                while (hasMore)
                 {
-                    Console.Error.WriteLine($"Error fetching {type} (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
-                    return null;
-                }
-
-                try
-                {
-                    dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
-
-                    hasNext = type == "following" ? obj!.data.user.edge_follow.page_info.has_next_page : obj!.data.user.edge_followed_by.page_info.has_next_page;
-                    after = type == "following" ? obj.data.user.edge_follow.page_info.end_cursor : obj.data.user.edge_followed_by.page_info.end_cursor;
-
-                    if (type == "following")
+                    var request = new RestRequest($"/api/v1/friendships/{userPK}/{type}/", Method.Get);
+                    request.AddQueryParameter("count", count);
+                    if (!string.IsNullOrEmpty(after))
                     {
-                        foreach (dynamic following in obj.data.user.edge_follow.edges)
+                        request.AddQueryParameter("max_id", after);
+                    }
+                    request.AddHeader("cookie", cookie);
+                    request.AddHeader("x-ig-app-id", "936619743392459");
+                    if (type == "followers")
+                    {
+                        request.AddQueryParameter("search_surface", "follow_list_page");
+                    }
+
+                    var response = client.Execute(request);
+
+                    if (!response.IsSuccessful)
+                    {
+                        Console.Error.WriteLine($"Error fetching {type} on pass {pass} (maybe cookie is invalid)\nStatus code: {response.StatusCode}");
+                        return null;
+                    }
+
+                    try
+                    {
+                        dynamic obj = JsonConvert.DeserializeObject(response.Content!)!;
+
+                        hasMore = obj.has_more;
+                        if (hasMore)
                         {
-                            list[(string)following.node.id] = (string)following.node.username;
+                            after = (string)obj.next_max_id;
+                        }
+
+                        foreach (dynamic user in obj.users)
+                        {
+                            list[(string)user.pk] = (string)user.username;
                         }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        foreach (dynamic follower in obj.data.user.edge_followed_by.edges)
-                        {
-                            list[(string)follower.node.id] = (string)follower.node.username;
-                        }
+                        Console.Error.WriteLine($"Error fetching {type} on pass {pass}: {e.Message}");
+                        return null;
                     }
+
+                    sleepRandom(minTime, maxTime);
                 }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine($"Error fetching {type}: {e.Message}");
-                    return null;
-                }
-                sleepRandom(minTime, maxTime);
             }
+
             return list;
         }
 
